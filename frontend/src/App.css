@@ -1,0 +1,2821 @@
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+
+  font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+
+  background: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: white;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+
+  background:
+          radial-gradient(
+                  circle at 10% 0%,
+                  rgba(37, 99, 235, 0.16),
+                  transparent 30%
+          ),
+          radial-gradient(
+                  circle at 90% 20%,
+                  rgba(124, 58, 237, 0.12),
+                  transparent 28%
+          ),
+          #0f172a;
+
+  color: white;
+}
+
+.mainContent {
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+/* =========================================================
+   DASHBOARD
+   KEEPING YOUR NEW DESIGN
+========================================================= */
+
+.dashboard {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+
+  padding: 50px 25px 40px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+
+/* HERO */
+
+.dashboardHero {
+  width: 100%;
+  max-width: 850px;
+
+  text-align: center;
+
+  margin-bottom: 35px;
+
+  animation: heroAppear 0.6s ease;
+}
+
+@keyframes heroAppear {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.heroBadge {
+  display: inline-block;
+
+  padding: 8px 15px;
+  margin-bottom: 17px;
+
+  border-radius: 30px;
+
+  background: rgba(37, 99, 235, 0.12);
+
+  border: 1px solid rgba(96, 165, 250, 0.25);
+
+  color: #93c5fd;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dashboardHero h1 {
+  margin: 0;
+
+  font-size: clamp(38px, 6vw, 62px);
+
+  line-height: 1.08;
+
+  letter-spacing: -2px;
+
+  font-weight: 800;
+}
+
+.dashboardHero h1 span {
+  background:
+          linear-gradient(
+                  90deg,
+                  #60a5fa,
+                  #a78bfa,
+                  #38bdf8
+          );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+.dashboardHero p {
+  max-width: 650px;
+
+  margin: 20px auto 0;
+
+  color: #94a3b8;
+
+  font-size: 16px;
+
+  line-height: 1.7;
+}
+
+
+/* STATS */
+
+.dashboardStats {
+  width: 100%;
+  max-width: 850px;
+
+  display: grid;
+
+  grid-template-columns:
+        repeat(3, 1fr);
+
+  gap: 15px;
+
+  margin-bottom: 45px;
+}
+
+.statCard {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 17px;
+
+  border-radius: 14px;
+
+  background:
+          rgba(17, 24, 39, 0.75);
+
+  border:
+          1px solid rgba(148, 163, 184, 0.10);
+
+  backdrop-filter: blur(10px);
+
+  transition:
+          transform 0.2s ease,
+          border 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+
+  border-color:
+          rgba(96, 165, 250, 0.25);
+}
+
+.statIcon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: #1e293b;
+
+  font-size: 20px;
+}
+
+.statCard strong {
+  display: block;
+
+  color: #f8fafc;
+
+  font-size: 18px;
+}
+
+.statCard span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #64748b;
+
+  font-size: 12px;
+}
+
+
+/* SECTION TITLE */
+
+.sectionTitle {
+  width: 100%;
+
+  text-align: center;
+
+  margin-bottom: 20px;
+}
+
+.sectionTitle h2 {
+  margin: 0;
+
+  color: #f8fafc;
+
+  font-size: 24px;
+
+  font-weight: 700;
+}
+
+.sectionTitle p {
+  margin: 7px 0 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+/* DASHBOARD UPLOAD */
+
+.dashboardUploadSection {
+  width: 100%;
+  max-width: 850px;
+
+  margin-bottom: 55px;
+}
+
+.dashboardUploadSection .uploadBox {
+  width: 100%;
+
+  padding: 35px;
+
+  text-align: center;
+
+  background:
+          linear-gradient(
+                  145deg,
+                  rgba(17, 24, 39, 0.95),
+                  rgba(15, 23, 42, 0.95)
+          );
+
+  border: 1px dashed #38bdf8;
+
+  border-radius: 20px;
+
+  box-shadow:
+          0 20px 45px rgba(0, 0, 0, 0.22);
+
+  color: white;
+}
+
+.dashboardUploadSection .uploadBox h2 {
+  margin-top: 0;
+
+  color: white;
+}
+
+
+/* TOOLS */
+
+.toolsSection {
+  width: 100%;
+  max-width: 1000px;
+}
+
+.featureGrid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+        repeat(3, 1fr);
+
+  gap: 15px;
+}
+
+
+/* FEATURE CARD */
+
+.featureCard {
+  position: relative;
+
+  min-height: 145px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 20px;
+
+  text-align: left;
+
+  border-radius: 17px;
+
+  border:
+          1px solid rgba(148, 163, 184, 0.10);
+
+  background:
+          rgba(17, 24, 39, 0.75);
+
+  color: white;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition:
+          transform 0.22s ease,
+          border 0.22s ease,
+          background 0.22s ease,
+          box-shadow 0.22s ease;
+}
+
+.featureCard::before {
+  content: "";
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  right: -40px;
+  bottom: -50px;
+
+  border-radius: 50%;
+
+  background:
+          rgba(255, 255, 255, 0.04);
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+
+  background:
+          rgba(30, 41, 59, 0.9);
+
+  border-color:
+          rgba(96, 165, 250, 0.28);
+
+  box-shadow:
+          0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+.featureIcon {
+  width: 55px;
+  height: 55px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 14px;
+
+  background: #1e293b;
+
+  font-size: 26px;
+
+  transition:
+          transform 0.22s ease;
+}
+
+.featureCard:hover .featureIcon {
+  transform: scale(1.08);
+}
+
+.featureContent {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.featureContent h3 {
+  margin: 0;
+
+  color: #f8fafc;
+
+  font-size: 16px;
+
+  font-weight: 650;
+}
+
+.featureContent p {
+  margin: 6px 0 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  line-height: 1.4;
+}
+
+.featureArrow {
+  color: #64748b;
+
+  font-size: 21px;
+
+  transition:
+          transform 0.2s ease,
+          color 0.2s ease;
+}
+
+.featureCard:hover .featureArrow {
+  color: #60a5fa;
+
+  transform: translateX(4px);
+}
+
+
+/* FEATURE COLORS */
+
+.featureCard.blue .featureIcon {
+  background: rgba(37, 99, 235, 0.18);
+  color: #60a5fa;
+}
+
+.featureCard.purple .featureIcon {
+  background: rgba(124, 58, 237, 0.18);
+  color: #a78bfa;
+}
+
+.featureCard.orange .featureIcon {
+  background: rgba(234, 88, 12, 0.18);
+  color: #fb923c;
+}
+
+.featureCard.green .featureIcon {
+  background: rgba(5, 150, 105, 0.18);
+  color: #34d399;
+}
+
+.featureCard.cyan .featureIcon {
+  background: rgba(8, 145, 178, 0.18);
+  color: #22d3ee;
+}
+
+.featureCard.pink .featureIcon {
+  background: rgba(219, 39, 119, 0.18);
+  color: #f472b6;
+}
+
+.featureCard.indigo .featureIcon {
+  background: rgba(79, 70, 229, 0.18);
+  color: #818cf8;
+}
+
+.featureCard.yellow .featureIcon {
+  background: rgba(202, 138, 4, 0.18);
+  color: #facc15;
+}
+
+.featureCard.red .featureIcon {
+  background: rgba(220, 38, 38, 0.18);
+  color: #f87171;
+}
+
+
+/* DASHBOARD FOOTER */
+
+.dashboardFooter {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  margin-top: 50px;
+
+  color: #475569;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   FEATURE PAGES
+   RESTORED ATTRACTIVE DESIGN
+========================================================= */
+
+.featurePage {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 35px 20px 60px;
+
+  background: transparent;
+}
+
+
+/* BACK BUTTON */
+
+.backButton {
+  align-self: flex-start;
+
+  margin-bottom: 30px;
+  margin-left: 15px;
+
+  padding: 12px 22px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+          background 0.2s ease,
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+}
+
+.backButton:hover {
+  background: #1d4ed8;
+
+  transform: translateX(-3px);
+
+  box-shadow:
+          0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+
+/* =========================================================
+   COMMON FEATURE CONTAINERS
+========================================================= */
+
+.uploadBox,
+.mergeContainer,
+.splitContainer,
+.rotateContainer,
+.extractContainer,
+.watermarkContainer,
+.previewContainer,
+.deleteContainer,
+.result {
+  position: relative;
+
+  width: 600px;
+  max-width: 94%;
+
+  padding: 35px;
+
+  background:
+          linear-gradient(
+                  145deg,
+                  rgba(17, 24, 39, 0.96),
+                  rgba(15, 23, 42, 0.96)
+          );
+
+  border:
+          1px solid rgba(148, 163, 184, 0.12);
+
+  border-radius: 20px;
+
+  box-shadow:
+          0 20px 45px rgba(0, 0, 0, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+  color: white;
+}
+
+
+/* TOP GLOW */
+
+.uploadBox::before,
+.mergeContainer::before,
+.splitContainer::before,
+.rotateContainer::before,
+.extractContainer::before,
+.watermarkContainer::before,
+.previewContainer::before,
+.deleteContainer::before,
+.result::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 15%;
+
+  width: 70%;
+  height: 1px;
+
+  background:
+          linear-gradient(
+                  90deg,
+                  transparent,
+                  #38bdf8,
+                  transparent
+          );
+
+  opacity: 0.8;
+}
+
+
+/* =========================================================
+   FEATURE HEADERS
+========================================================= */
+
+.uploadBox h2,
+.mergeHeader h2,
+.splitHeader h2,
+.rotateHeader h2,
+.extractHeader h2,
+.watermarkHeader h2,
+.previewHeader h2,
+.deleteHeader h2,
+.result h2 {
+  margin-top: 0;
+
+  color: #f8fafc;
+
+  font-size: 27px;
+
+  font-weight: 750;
+
+  text-align: center;
+}
+
+.mergeHeader,
+.splitHeader,
+.rotateHeader,
+.extractHeader,
+.watermarkHeader,
+.previewHeader,
+.deleteHeader {
+  text-align: center;
+
+  margin-bottom: 25px;
+}
+
+.mergeHeader p,
+.splitHeader p,
+.rotateHeader p,
+.extractHeader p,
+.watermarkHeader p,
+.previewHeader p,
+.deleteHeader p {
+  margin-top: 8px;
+
+  color: #94a3b8;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   FILE SELECT
+========================================================= */
+
+.uploadBox input[type="file"] {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px dashed #475569;
+
+  border-radius: 10px;
+
+  background: #1e293b;
+
+  color: #cbd5e1;
+
+  cursor: pointer;
+}
+
+.uploadBox input[type="file"]:hover {
+  border-color: #38bdf8;
+}
+
+
+/* =========================================================
+   INPUTS & SELECTS
+========================================================= */
+
+.mergeContainer select,
+.splitContainer select,
+.rotateContainer select,
+.extractContainer select,
+.watermarkContainer select,
+.previewContainer select,
+.deleteContainer select,
+
+.splitContainer input,
+.rotateContainer input,
+.extractContainer input,
+.watermarkContainer input {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  margin-bottom: 4px;
+
+  border: 1px solid #334155;
+
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #1e293b;
+
+  color: white;
+
+  font-size: 14px;
+
+  transition:
+          border 0.2s ease,
+          box-shadow 0.2s ease;
+}
+
+.mergeContainer select:focus,
+.splitContainer select:focus,
+.rotateContainer select:focus,
+.extractContainer select:focus,
+.watermarkContainer select:focus,
+.previewContainer select:focus,
+.deleteContainer select:focus,
+
+.splitContainer input:focus,
+.rotateContainer input:focus,
+.extractContainer input:focus,
+.watermarkContainer input:focus {
+  border-color: #38bdf8;
+
+  box-shadow:
+          0 0 0 3px rgba(56, 189, 248, 0.10);
+}
+
+
+/* =========================================================
+   COMMON BUTTONS
+========================================================= */
+
+.uploadBox button,
+.mergeContainer button,
+.splitContainer button,
+.rotateContainer button,
+.extractContainer button,
+.watermarkContainer button,
+.previewContainer button,
+.deleteContainer button {
+  padding: 12px 22px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background:
+          linear-gradient(
+                  135deg,
+                  #2563eb,
+                  #3b82f6
+          );
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 650;
+
+  cursor: pointer;
+
+  box-shadow:
+          0 8px 18px rgba(37, 99, 235, 0.18);
+
+  transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+}
+
+.uploadBox button:hover,
+.mergeContainer button:hover,
+.splitContainer button:hover,
+.rotateContainer button:hover,
+.extractContainer button:hover,
+.watermarkContainer button:hover,
+.previewContainer button:hover,
+.deleteContainer button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+          0 12px 25px rgba(37, 99, 235, 0.28);
+
+  background:
+          linear-gradient(
+                  135deg,
+                  #1d4ed8,
+                  #2563eb
+          );
+}
+
+
+/* =========================================================
+   UPLOAD PAGE
+========================================================= */
+
+.featurePage > .uploadBox {
+  text-align: center;
+}
+
+.featurePage > .uploadBox h2::first-letter {
+  font-size: 30px;
+}
+
+.uploadBox p {
+  color: #cbd5e1;
+
+  line-height: 1.6;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   DELETE PAGE
+========================================================= */
+
+.deleteContainer {
+  text-align: center;
+}
+
+.deleteContainer select {
+  margin-bottom: 20px;
+}
+
+.deleteButton {
+  background:
+          linear-gradient(
+                  135deg,
+                  #dc2626,
+                  #ef4444
+          ) !important;
+}
+
+.deleteButton:hover {
+  background:
+          linear-gradient(
+                  135deg,
+                  #b91c1c,
+                  #dc2626
+          ) !important;
+}
+
+
+/* =========================================================
+   PDF TABLE
+========================================================= */
+
+.result {
+  width: 900px;
+  max-width: 96%;
+
+  overflow-x: auto;
+}
+
+.result h2 {
+  margin-bottom: 25px;
+}
+
+.result table {
+  width: 100%;
+
+  border-collapse: separate;
+
+  border-spacing: 0;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  border: 1px solid #334155;
+
+  background: #111827;
+}
+
+.result th {
+  padding: 14px;
+
+  background: #1e293b;
+
+  color: #93c5fd;
+
+  font-size: 13px;
+
+  text-align: left;
+
+  border-bottom: 1px solid #334155;
+}
+
+.result td {
+  padding: 14px;
+
+  color: #cbd5e1;
+
+  font-size: 13px;
+
+  border-bottom: 1px solid #1e293b;
+}
+
+.result tr:last-child td {
+  border-bottom: none;
+}
+
+.result tbody tr {
+  transition:
+          background 0.2s ease;
+}
+
+.result tbody tr:hover {
+  background:
+          rgba(37, 99, 235, 0.07);
+}
+
+.result td button {
+  margin-right: 7px;
+
+  padding: 8px 12px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #334155;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  transition:
+          background 0.2s ease,
+          transform 0.2s ease;
+}
+
+.result td button:hover {
+  background: #475569;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SUCCESS / MESSAGE
+========================================================= */
+
+.uploadBox p,
+.splitContainer > p,
+.rotateContainer > p,
+.extractContainer > p,
+.watermarkContainer > p,
+.deleteContainer > p {
+  text-align: center;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .dashboard {
+    padding: 40px 18px;
+  }
+
+  .dashboardStats {
+    grid-template-columns:
+            repeat(3, 1fr);
+  }
+
+  .featureGrid {
+    grid-template-columns:
+            repeat(2, 1fr);
+  }
+
+  .uploadBox,
+  .mergeContainer,
+  .splitContainer,
+  .rotateContainer,
+  .extractContainer,
+  .watermarkContainer,
+  .previewContainer,
+  .deleteContainer,
+  .result {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .dashboard {
+    padding: 35px 14px;
+  }
+
+  .dashboardHero h1 {
+    font-size: 38px;
+
+    letter-spacing: -1px;
+  }
+
+  .dashboardHero p {
+    font-size: 14px;
+  }
+
+  .dashboardStats {
+    grid-template-columns: 1fr;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featureCard {
+    min-height: 105px;
+  }
+
+  .dashboardUploadSection .uploadBox {
+    padding: 25px 18px;
+  }
+
+  .featurePage {
+    padding: 25px 12px 45px;
+  }
+
+  .backButton {
+    margin-left: 0;
+  }
+
+  .uploadBox,
+  .mergeContainer,
+  .splitContainer,
+  .rotateContainer,
+  .extractContainer,
+  .watermarkContainer,
+  .previewContainer,
+  .deleteContainer,
+  .result {
+    padding: 25px 18px;
+  }
+
+  .result {
+    overflow-x: auto;
+  }
+
+  .result table {
+    min-width: 650px;
+  }
+
+  .dashboardFooter {
+    flex-wrap: wrap;
+
+    text-align: center;
+  }
+  /* Edit PDF - Text Box */
+  .editTextBox {
+    width: 400px;
+    height: 70px;
+
+    min-width: 400px;
+    max-width: 400px;
+
+    min-height: 70px;
+    max-height: 70px;
+
+    padding: 10px;
+
+    box-sizing: border-box;
+
+    resize: none;
+
+    overflow-y: auto;
+
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+
+    border: 1px solid #aaa;
+    border-radius: 6px;
+
+    background: white;
+    color: black;
+  }
+  .findReplacePage {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .featureHeader {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .featureIcon {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    background: #facc15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .featureHeader h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #ffffff;
+  }
+
+  .featureHeader p {
+    margin: 5px 0 0;
+    color: #cbd5e1;
+  }
+
+  .findReplaceCard {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .findReplaceCard h2 {
+    margin-top: 0;
+    color: #111827;
+  }
+
+  .featureDescription {
+    color: #64748b;
+    margin-bottom: 25px;
+  }
+
+  .formGroup {
+    margin-bottom: 20px;
+  }
+
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .formGroup input,
+  .formGroup select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+  }
+
+  .formGroup input:focus,
+  .formGroup select:focus {
+    border-color: #eab308;
+  }
+
+  .primaryButton {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #eab308;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .primaryButton:hover {
+    background: #facc15;
+  }
+
+  .primaryButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .errorMessage {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .successMessage {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .resultBox {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    text-align: center;
+  }
+
+  .resultBox h3 {
+    margin-top: 0;
+    color: #166534;
+  }
+
+  .resultBox p {
+    color: #475569;
+  }
+
+  .downloadButton {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #16a34a;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .downloadButton:hover {
+    background: #15803d;
+  }
+  /* =========================================
+   FIND & REPLACE RESULT
+========================================= */
+
+  .resultActions {
+    margin-top: 20px;
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+
+  /* =========================================
+     DOWNLOAD BUTTON
+  ========================================= */
+
+  .downloadButton {
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    background: #22c55e;
+    color: white;
+    transition: 0.2s ease;
+  }
+
+  .downloadButton:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+
+  /* =========================================
+     RESULT FILE NAME
+  ========================================= */
+
+  .resultFileName {
+    margin-top: 10px;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+
+  /* =========================================
+     BACK TO HOME
+  ========================================= */
+
+  .backHomeButton {
+    margin-top: 20px;
+    width: 100%;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    background: #374151;
+    color: white;
+    transition: 0.2s ease;
+  }
+
+  .backHomeButton:hover {
+    background: #4b5563;
+  }
+  /* =====================================================
+   PDF FORM FIELD PAGE
+===================================================== */
+
+  .formFieldPage {
+    width: 100%;
+    min-height: 100vh;
+    padding: 30px 20px 60px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+
+  /* =====================================================
+     HEADER
+  ===================================================== */
+
+  .formFieldHeader {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 25px;
+  }
+
+  .formBackButton {
+    border: none;
+    background: transparent;
+    color: #7da2ff;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .formBackButton:hover {
+    text-decoration: underline;
+  }
+
+  .formFieldTitle {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .formFieldIcon {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: rgba(100, 140, 255, 0.15);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 28px;
+  }
+
+  .formFieldTitle h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 42px);
+  }
+
+  .formFieldTitle p {
+    margin: 7px 0 0;
+    color: #aab5d6;
+    font-size: 15px;
+  }
+
+
+  /* =====================================================
+     CARD
+  ===================================================== */
+
+  .formFieldCard {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    background: rgba(20, 30, 55, 0.96);
+
+    border: 1px solid rgba(120, 150, 220, 0.2);
+
+    border-radius: 18px;
+
+    box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.25);
+  }
+
+
+  /* =====================================================
+     CARD HEADER
+  ===================================================== */
+
+  .formCardHeader {
+    margin-bottom: 25px;
+  }
+
+  .formCardHeader h2 {
+    margin: 0 0 7px;
+    font-size: 25px;
+  }
+
+  .formCardHeader p {
+    margin: 0;
+    color: #aab5d6;
+  }
+
+
+  /* =====================================================
+     FORM GRID
+  ===================================================== */
+
+  .formGrid {
+    display: grid;
+    width: 100%;
+    gap: 18px;
+  }
+
+  .twoColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fiveColumns {
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+  }
+
+
+  /* =====================================================
+     FORM GROUP
+  ===================================================== */
+
+  .formGroup {
+    min-width: 0;
+    margin-bottom: 18px;
+  }
+
+  .fullWidth {
+    width: 100%;
+  }
+
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+
+    color: #e4e9ff;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .formGroup input,
+  .formGroup select {
+
+    width: 100%;
+
+    min-width: 0;
+
+    height: 44px;
+
+    padding: 0 12px;
+
+    box-sizing: border-box;
+
+    border-radius: 8px;
+
+    border: 1px solid #435174;
+
+    background: #20283a;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    outline: none;
+  }
+
+  .formGroup input:focus,
+  .formGroup select:focus {
+    border-color: #6f96ff;
+    box-shadow:
+            0 0 0 3px rgba(111, 150, 255, 0.12);
+  }
+
+  .inputHint {
+    display: block;
+    margin-top: 6px;
+    color: #8490b1;
+    font-size: 12px;
+  }
+
+
+  /* =====================================================
+     SECTION TITLE
+  ===================================================== */
+
+  .sectionTitle {
+    margin: 8px 0 18px;
+
+    padding-top: 8px;
+
+    color: #ffffff;
+
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+
+  /* =====================================================
+     ALERTS
+  ===================================================== */
+
+  .formAlert {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 13px 15px;
+
+    margin: 10px 0 18px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+  }
+
+  .errorAlert {
+    background: rgba(255, 70, 70, 0.12);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff9d9d;
+  }
+
+  .successAlert {
+    background: rgba(60, 210, 130, 0.12);
+    border: 1px solid rgba(60, 210, 130, 0.3);
+    color: #82e6ae;
+  }
+
+
+  /* =====================================================
+     CREATED FIELD
+  ===================================================== */
+
+  .createdFieldCard {
+
+    margin: 10px 0 20px;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: rgba(70, 130, 255, 0.08);
+
+    border: 1px solid rgba(100, 150, 255, 0.2);
+  }
+
+  .createdFieldTitle {
+    margin-bottom: 12px;
+
+    color: #8fb0ff;
+
+    font-weight: 700;
+  }
+
+  .createdFieldInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 25px;
+
+    color: #b9c3df;
+
+    font-size: 13px;
+  }
+
+
+  /* =====================================================
+     BUTTONS
+  ===================================================== */
+
+  .formActionButtons {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-top: 20px;
+  }
+
+  .primaryFormButton,
+  .fillFormButton,
+  .downloadFormButton {
+
+    min-height: 46px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    padding: 10px 18px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            transform 0.2s ease,
+            opacity 0.2s ease;
+  }
+
+  .primaryFormButton {
+    background: #547cff;
+    color: white;
+  }
+
+  .fillFormButton {
+    background: #28a86b;
+    color: white;
+  }
+
+  .primaryFormButton:hover,
+  .fillFormButton:hover,
+  .downloadFormButton:hover {
+    transform: translateY(-1px);
+  }
+
+  .primaryFormButton:disabled,
+  .fillFormButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+
+  /* =====================================================
+     DOWNLOAD
+  ===================================================== */
+
+  .downloadResult {
+
+    margin-top: 20px;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: rgba(60, 210, 130, 0.08);
+
+    border: 1px solid rgba(60, 210, 130, 0.25);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+  }
+
+  .downloadInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .downloadInfo span {
+    color: #78e6a5;
+    font-weight: 700;
+  }
+
+  .downloadInfo small {
+    color: #aab5d6;
+  }
+
+  .downloadFormButton {
+    background: #ffffff;
+    color: #18223b;
+    white-space: nowrap;
+  }
+
+
+  /* =====================================================
+     TABLET
+  ===================================================== */
+
+  @media (max-width: 850px) {
+
+    .formFieldPage {
+      padding: 20px 15px 40px;
+    }
+
+    .formFieldCard {
+      padding: 22px;
+    }
+
+    .fiveColumns {
+      grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .downloadResult {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .downloadFormButton {
+      width: 100%;
+    }
+  }
+
+
+  /* =====================================================
+     MOBILE
+  ===================================================== */
+
+  @media (max-width: 600px) {
+
+    .formFieldPage {
+      padding: 15px 10px 30px;
+    }
+
+    .formFieldCard {
+      padding: 18px 15px;
+      border-radius: 14px;
+    }
+
+    .formFieldTitle {
+      align-items: flex-start;
+    }
+
+    .formFieldIcon {
+      width: 45px;
+      height: 45px;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .formFieldTitle h1 {
+      font-size: 27px;
+    }
+
+    .formFieldTitle p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .twoColumns {
+      grid-template-columns: 1fr;
+    }
+
+    .fiveColumns {
+      grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .formActionButtons {
+      grid-template-columns: 1fr;
+    }
+
+    .createdFieldInfo {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+
+  /* =====================================================
+     VERY SMALL MOBILE
+  ===================================================== */
+
+  @media (max-width: 380px) {
+
+    .fiveColumns {
+      grid-template-columns: 1fr;
+    }
+
+    .formFieldCard {
+      padding: 15px 12px;
+    }
+
+    .formFieldTitle h1 {
+      font-size: 23px;
+    }
+  }
+  /* =========================================================
+   PDF FORM FILLER
+========================================================= */
+
+  .formFillerPage {
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    box-sizing: border-box;
+  }
+
+  .formFillerHeader {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto 30px;
+    text-align: center;
+  }
+
+  .formFillerHeader h1 {
+    font-size: 38px;
+    margin-bottom: 10px;
+  }
+
+  .formFillerHeader p {
+    font-size: 17px;
+    opacity: 0.8;
+  }
+
+
+  /* =========================================================
+     MAIN CARD
+  ========================================================= */
+
+  .formFillerCard {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 35px;
+    box-sizing: border-box;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+  }
+
+  .formFillerCard h2 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+
+  .formDescription {
+    margin-bottom: 30px;
+    opacity: 0.75;
+  }
+
+
+  /* =========================================================
+     FORM FIELDS
+  ========================================================= */
+
+  .formField {
+    width: 100%;
+    margin-bottom: 22px;
+  }
+
+  .formField label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .formField input,
+  .formField select,
+  .formField textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 15px;
+    outline: none;
+  }
+
+  .formField textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  .formField input:focus,
+  .formField select:focus,
+  .formField textarea:focus {
+    border-color: #6ea8ff;
+  }
+
+
+  /* =========================================================
+     SIGNATURE
+  ========================================================= */
+
+  .signatureSection {
+    width: 100%;
+    margin-top: 30px;
+    margin-bottom: 28px;
+    padding: 22px;
+    box-sizing: border-box;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .signatureHeader h3 {
+    margin: 0 0 5px;
+    font-size: 21px;
+  }
+
+  .signatureHeader p {
+    margin: 0 0 18px;
+    opacity: 0.7;
+  }
+
+  .signatureCanvasWrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background: white;
+    border: 2px dashed #888;
+  }
+
+  .signatureCanvas {
+    display: block;
+    width: 100%;
+    height: 180px;
+    cursor: crosshair;
+    background: white;
+  }
+
+  .signaturePlaceholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #999;
+    pointer-events: none;
+    font-size: 17px;
+  }
+
+  .clearSignatureButton {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #444;
+    color: white;
+  }
+
+  .clearSignatureButton:hover {
+    opacity: 0.85;
+  }
+
+
+  /* =========================================================
+     BUTTONS
+  ========================================================= */
+
+  .fillPdfButton {
+    width: 100%;
+    margin-top: 10px;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .resultActions {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .downloadButton {
+    padding: 13px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .resultFileName {
+    margin-top: 10px;
+    opacity: 0.75;
+  }
+
+
+  /* =========================================================
+     ERROR / SUCCESS
+  ========================================================= */
+
+  .errorMessage {
+    margin: 15px 0;
+    padding: 13px;
+    border-radius: 8px;
+    background: rgba(255, 0, 0, 0.12);
+  }
+
+  .successMessage {
+    margin: 15px 0;
+    padding: 13px;
+    border-radius: 8px;
+    background: rgba(0, 255, 100, 0.12);
+  }
+
+
+  /* =========================================================
+     MOBILE
+  ========================================================= */
+
+  @media (max-width: 700px) {
+
+    .formFillerPage {
+      padding: 25px 12px 50px;
+    }
+
+    .formFillerHeader h1 {
+      font-size: 28px;
+    }
+
+    .formFillerCard {
+      padding: 20px;
+    }
+
+    .signatureSection {
+      padding: 15px;
+    }
+
+    .signatureCanvas {
+      height: 150px;
+    }
+  }
+  /* =========================================================
+   SIGNATURE PORTAL
+========================================================= */
+
+  .signatureSection {
+    width: 100%;
+    margin: 30px 0;
+    padding: 24px;
+    box-sizing: border-box;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .signatureSection h3 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  .signatureDescription {
+    margin: 0 0 18px;
+    opacity: 0.7;
+  }
+
+
+  /* =========================================================
+     PASTE AREA
+  ========================================================= */
+
+  .signaturePasteArea {
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+
+    background: white;
+
+    border: 2px dashed #777;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    outline: none;
+  }
+
+  .signaturePasteArea:focus {
+    border-color: #6ea8ff;
+  }
+
+
+  /* =========================================================
+     PLACEHOLDER
+  ========================================================= */
+
+  .signaturePastePlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    color: #777;
+
+    text-align: center;
+  }
+
+  .signaturePasteIcon {
+    font-size: 38px;
+  }
+
+  .signaturePastePlaceholder strong {
+    font-size: 18px;
+  }
+
+  .signaturePastePlaceholder span {
+    font-size: 14px;
+  }
+
+  .signaturePastePlaceholder small {
+    font-size: 12px;
+    color: #999;
+  }
+
+
+  /* =========================================================
+     SIGNATURE PREVIEW
+  ========================================================= */
+
+  .signaturePreview {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  .signaturePreview img {
+    max-width: 90%;
+    max-height: 85%;
+
+    object-fit: contain;
+  }
+
+
+  /* =========================================================
+     BUTTONS
+  ========================================================= */
+
+  .signatureActions {
+    display: flex;
+    gap: 12px;
+
+    margin-top: 15px;
+
+    flex-wrap: wrap;
+  }
+
+  .signatureUploadButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    border-radius: 8px;
+
+    background: #2864d7;
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .signatureUploadButton:hover {
+    opacity: 0.9;
+  }
+
+
+  .removeSignatureButton {
+    padding: 11px 18px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #444;
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+  }
+
+  .removeSignatureButton:hover {
+    opacity: 0.85;
+  }
+
+
+  /* =========================================================
+     SUCCESS
+  ========================================================= */
+
+  .signatureSuccess {
+    margin-top: 14px;
+
+    padding: 10px 14px;
+
+    border-radius: 8px;
+
+    background: rgba(0, 200, 100, 0.1);
+
+    font-size: 14px;
+  }
+
+
+  /* =========================================================
+     MOBILE
+  ========================================================= */
+
+  @media (max-width: 600px) {
+
+    .signatureSection {
+      padding: 16px;
+    }
+
+    .signaturePasteArea {
+      height: 160px;
+    }
+
+    .signatureActions {
+      flex-direction: column;
+    }
+
+    .signatureUploadButton,
+    .removeSignatureButton {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+    }
+  }
+  /* =====================================================
+   PDF FORM FILLER
+===================================================== */
+
+  .pdfFormFields {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+
+  /* Each field goes one below another */
+
+  .pdfFormFields .formGroup {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+
+  /* Labels */
+
+  .pdfFormFields .formGroup label {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+
+  /* Inputs */
+
+  .pdfFormFields input,
+  .pdfFormFields select,
+  .pdfFormFields textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 12px 14px;
+
+    border-radius: 7px;
+    border: 1px solid #555;
+
+    font-size: 15px;
+  }
+
+
+  /* Address */
+
+  .pdfFormFields textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+
+  /* Employment type */
+
+  .employmentType {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: center;
+  }
+
+
+  .employmentType label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal !important;
+  }
+
+
+  .employmentType input {
+    width: auto !important;
+  }
+
+
+  /* Signature preview */
+
+  .signaturePreview {
+    margin-top: 10px;
+
+    width: 300px;
+    min-height: 100px;
+
+    border: 1px dashed #777;
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+  }
+
+
+  .signaturePreview img {
+    max-width: 280px;
+    max-height: 90px;
+
+    object-fit: contain;
+  }
+  .featurePage {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .featurePage .featureCard {
+    width: min(95%, 950px);
+    margin: 30px auto;
+    box-sizing: border-box;
+  }
+  /* =====================================================
+   EMPLOYEE PDF FORM FILLER
+===================================================== */
+
+  .pdfFormFillerCard {
+    width: min(95%, 900px);
+    margin: 30px auto;
+    box-sizing: border-box;
+  }
+
+  .pdfFormFields {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .pdfFormFields .formGroup {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pdfFormFields .formGroup > label {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .pdfFormFields input[type="text"],
+  .pdfFormFields input[type="email"],
+  .pdfFormFields input[type="date"],
+  .pdfFormFields input[type="file"],
+  .pdfFormFields select,
+  .pdfFormFields textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 13px;
+    border-radius: 7px;
+    border: 1px solid #777;
+    font-size: 15px;
+  }
+
+  .pdfFormFields textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+
+  /* =====================================================
+     EMPLOYMENT TYPE
+  ===================================================== */
+
+  .employmentType {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 35px;
+  }
+
+  .employmentType label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal !important;
+  }
+
+  .employmentType input[type="radio"] {
+    width: auto !important;
+  }
+
+
+  /* =====================================================
+     SIGNATURE
+  ===================================================== */
+
+  .signatureHelp {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.75;
+  }
+
+  .signaturePreview {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin-top: 5px;
+    border: 1px dashed #888;
+    border-radius: 8px;
+    background: white;
+    box-sizing: border-box;
+  }
+
+  .signaturePreview p {
+    margin-top: 0;
+    color: #222;
+    font-weight: 600;
+  }
+
+  .signaturePreview img {
+    display: block;
+    max-width: 350px;
+    max-height: 120px;
+    object-fit: contain;
+    margin-bottom: 12px;
+  }
+
+  .removeSignatureButton {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+
+  /* =====================================================
+     RESPONSIVE
+  ===================================================== */
+
+  @media (max-width: 700px) {
+
+    .pdfFormFillerCard {
+      width: 94%;
+    }
+
+    .employmentType {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+  }
+  /* ============================================================
+   MAIN SEARCH
+   ============================================================ */
+
+  .mainSearchContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 32px 0 45px;
+
+    position: relative;
+    z-index: 10;
+  }
+
+  .mainSearchBox {
+    width: 680px;
+    max-width: calc(100% - 40px);
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    background: #ffffff;
+
+    border: 2px solid #d8def0;
+    border-radius: 16px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.15);
+
+    transition: all 0.2s ease;
+  }
+
+  .mainSearchBox:focus-within {
+    border-color: #4f7cff;
+
+    box-shadow:
+            0 8px 30px rgba(79, 124, 255, 0.25);
+  }
+
+  .searchIcon {
+    flex-shrink: 0;
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    margin-right: 12px;
+  }
+
+  .mainSearchBox input {
+    flex: 1;
+
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #20263a;
+
+    font-size: 17px;
+    font-family: inherit;
+  }
+
+  .mainSearchBox input::placeholder {
+    color: #7d8498;
+  }
+
+  .clearSearch {
+    flex-shrink: 0;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #666b7a;
+
+    font-size: 17px;
+
+    cursor: pointer;
+  }
+
+  .clearSearch:hover {
+    background: #eef1f8;
+    color: #222;
+  }
+
+
+  /* ============================================================
+     NO SEARCH RESULTS
+     ============================================================ */
+
+  .noSearchResults {
+    width: 100%;
+
+    text-align: center;
+
+    padding: 50px 20px;
+  }
+
+  .noSearchIcon {
+    font-size: 42px;
+    margin-bottom: 12px;
+  }
+
+  .noSearchResults h3 {
+    margin: 0 0 8px;
+
+    color: #ffffff;
+
+    font-size: 22px;
+  }
+
+  .noSearchResults p {
+    margin: 0;
+
+    color: #aeb7d0;
+
+    font-size: 15px;
+  }
+
+
+  /* ============================================================
+     MOBILE
+     ============================================================ */
+
+  @media (max-width: 600px) {
+
+    .mainSearchContainer {
+      margin: 25px 0 35px;
+    }
+
+    .mainSearchBox {
+      height: 54px;
+
+      max-width: calc(100% - 24px);
+
+      border-radius: 14px;
+    }
+
+    .mainSearchBox input {
+      font-size: 15px;
+    }
+
+  }
+  .propertiesGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 30px;
+
+    width: 100%;
+
+    padding: 30px;
+    box-sizing: border-box;
+  }
+
+  .propertySection {
+    min-width: 0;
+  }
+
+  .propertySection h3 {
+    margin: 0 0 22px 0;
+
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    line-height: 1.3;
+  }
+
+  .propertyItem {
+    display: block;
+
+    margin-bottom: 14px;
+
+    color: #e8ecf7;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+
+    word-break: break-word;
+  }
+
+  .propertyLabel {
+    font-weight: 600;
+
+    color: #ffffff;
+  }
+
+  .propertyValue {
+    font-weight: 400;
+
+    color: #d5dbea;
+
+    margin-left: 4px;
+  }
+
+
+  /* =====================================================
+     RESPONSIVE
+     ===================================================== */
+
+  @media (max-width: 1000px) {
+
+    .propertiesGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+  }
+
+  @media (max-width: 600px) {
+
+    .propertiesGrid {
+      grid-template-columns: 1fr;
+
+      padding: 20px;
+    }
+
+  }
+}
