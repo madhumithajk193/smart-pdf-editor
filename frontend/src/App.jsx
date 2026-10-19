@@ -62,9 +62,11 @@ function App() {
 
         try {
 
-            const response = await fetch(
-                "http://localhost:8080/api/pdfs"
-            );
+          
+const response = await fetch(
+    "https://smart-pdf-editor-backend.onrender.com/api/pdfs"
+);
+
 
             if (response.ok) {
 
