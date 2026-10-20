@@ -4,8 +4,8 @@ package com.smartpdf.backend.service;
 import com.smartpdf.backend.entity.PdfFile;
 import com.smartpdf.backend.repository.PdfRepository;
 
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -52,14 +53,16 @@ public class PdfMergeService {
         Path outputPath = null;
 
         try {
-            // Download every selected PDF from local storage or Backblaze.
+            // Download and validate each selected PDF.
             for (String idText : ids) {
+
                 final Long id;
 
                 try {
                     id = Long.parseLong(idText.trim());
                 } catch (NumberFormatException e) {
-                    throw new IOException("Invalid PDF ID: " + idText, e);
+                    throw new IOException(
+                            "Invalid PDF ID: " + idText, e);
                 }
 
                 if (id <= 0 || !uniqueIds.add(id)) {
@@ -75,35 +78,58 @@ public class PdfMergeService {
 
                 if (storedPath == null || storedPath.isBlank()) {
                     throw new IOException(
-                            "Stored file reference is missing for PDF " + id);
+                            "Stored file reference is missing for PDF ID " + id);
                 }
 
-                Path source;
+                Path source = null;
 
-                // Support older records that point to an actual local file.
-                Path possibleLocalPath = Paths.get(storedPath)
-                        .toAbsolutePath().normalize();
+                // Check whether this record refers to an existing local file.
+                try {
+                    Path possibleLocalPath =
+                            Paths.get(storedPath).toAbsolutePath().normalize();
 
-                if (Files.isRegularFile(possibleLocalPath)
-                        && Files.isReadable(possibleLocalPath)) {
-                    source = possibleLocalPath;
-                } else {
-                    // New uploads store their Backblaze object key in filePath.
+                    if (Files.isRegularFile(possibleLocalPath)
+                            && Files.isReadable(possibleLocalPath)) {
+                        source = possibleLocalPath;
+                    }
+                } catch (InvalidPathException ignored) {
+                    // If it is not a valid local path, try Backblaze.
+                }
+
+                // New uploads normally store a Backblaze object key.
+                if (source == null) {
                     source = storageService.downloadFile(storedPath);
+
+                    if (source == null
+                            || !Files.isRegularFile(source)
+                            || !Files.isReadable(source)) {
+                        throw new IOException(
+                                "Unable to download PDF ID " + id
+                                        + " from storage.");
+                    }
+
                     temporaryFiles.add(source);
                 }
 
-                if (!pdf.getFileName().toLowerCase().endsWith(".pdf")) {
+                String originalName = pdf.getFileName();
+
+                if (originalName == null
+                        || !originalName.toLowerCase()
+                                .endsWith(".pdf")) {
                     throw new IOException(
-                            "Selected file is not a PDF: " + pdf.getFileName());
+                            "Selected file is not a PDF: " + originalName);
                 }
 
-                try (PDDocument ignored = Loader.loadPDF(source.toFile())) {
-                    // Validate that PDFBox can open the source file.
+                // Validate that PDFBox can read the file.
+                try (PDDocument document = Loader.loadPDF(source.toFile())) {
+                    if (document.getNumberOfPages() == 0) {
+                        throw new IOException(
+                                "PDF ID " + id + " contains no pages.");
+                    }
                 } catch (IOException e) {
                     throw new IOException(
                             "Cannot read PDF ID " + id
-                                    + ". It may be damaged or password-protected.",
+                                    + ". The file may be damaged or password-protected.",
                             e);
                 }
 
@@ -111,16 +137,23 @@ public class PdfMergeService {
             }
 
             if (sourceFiles.size() < 2) {
-                throw new IOException("Select at least two PDFs to merge.");
+                throw new IOException(
+                        "Select at least two PDFs to merge.");
             }
 
-            // Validate and normalize the output filename.
+            // Validate the output filename.
             if (outputFileName == null || outputFileName.isBlank()) {
                 outputFileName = "merged.pdf";
             }
 
-            String safeName = Paths.get(outputFileName.trim())
-                    .getFileName().toString();
+            String safeName;
+
+            try {
+                safeName = Paths.get(outputFileName.trim())
+                        .getFileName().toString();
+            } catch (InvalidPathException e) {
+                throw new IOException("Invalid output filename.", e);
+            }
 
             if (!safeName.toLowerCase().endsWith(".pdf")) {
                 safeName += ".pdf";
@@ -129,21 +162,24 @@ public class PdfMergeService {
             if (!safeName.matches("[a-zA-Z0-9 _.-]+\\.pdf")
                     || safeName.equals(".pdf")
                     || safeName.equals("..pdf")) {
-                throw new IOException("Invalid output PDF filename.");
+                throw new IOException(
+                        "Invalid output PDF filename.");
             }
 
+            // Create a unique local working filename.
             Files.createDirectories(uploadDir);
 
-            // Avoid overwriting source PDFs or an earlier merged file.
             safeName = System.currentTimeMillis() + "-" + safeName;
+
             outputPath = uploadDir.resolve(safeName).normalize();
 
             if (!outputPath.getParent().equals(uploadDir)) {
                 throw new IOException("Invalid output path.");
             }
 
-            // Merge all PDFs in the order received.
+            // Merge the PDFs in the requested order.
             PDFMergerUtility merger = new PDFMergerUtility();
+
             merger.setDestinationFileName(outputPath.toString());
 
             for (Path source : sourceFiles) {
@@ -154,24 +190,29 @@ public class PdfMergeService {
 
             if (!Files.isRegularFile(outputPath)
                     || Files.size(outputPath) == 0) {
-                throw new IOException("The merged PDF was not created.");
+                throw new IOException(
+                        "The merged PDF was not created.");
             }
 
-            // Persist the merged PDF in Backblaze.
+            // Upload the merged PDF to Backblaze B2.
             String objectKey = "merged/" + safeName;
+
             storageService.uploadPath(outputPath, objectKey);
 
-            // Save a database record so the merged PDF appears in the PDF list.
+            // Save the merged PDF metadata in MySQL.
             PdfFile mergedPdf = new PdfFile();
+
             mergedPdf.setFileName(safeName);
             mergedPdf.setFilePath(objectKey);
             mergedPdf.setFileSize(Files.size(outputPath));
+
             pdfRepository.save(mergedPdf);
 
-            // Preserve the existing controller's text response format.
-            return outputPath.toString();
+            // Return the filename, not the temporary local path.
+            return safeName;
 
         } catch (Exception e) {
+
             if (outputPath != null) {
                 try {
                     Files.deleteIfExists(outputPath);
@@ -184,15 +225,26 @@ public class PdfMergeService {
                 throw ioException;
             }
 
-            throw new IOException("PDF merge failed: " + e.getMessage(), e);
+            throw new IOException(
+                    "PDF merge failed: " + e.getMessage(), e);
 
         } finally {
-            // Temporary files downloaded from Backblaze are no longer needed.
+
+            // Delete temporary source files downloaded from Backblaze.
             for (Path temp : temporaryFiles) {
                 try {
                     Files.deleteIfExists(temp);
                 } catch (IOException ignored) {
                     // Best-effort cleanup.
+                }
+            }
+
+            // Delete the local merged copy after uploading it.
+            if (outputPath != null) {
+                try {
+                    Files.deleteIfExists(outputPath);
+                } catch (IOException ignored) {
+                    // The Backblaze copy remains available.
                 }
             }
         }
