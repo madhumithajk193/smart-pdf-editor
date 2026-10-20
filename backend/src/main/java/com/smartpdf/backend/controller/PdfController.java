@@ -550,23 +550,36 @@ public ResponseEntity<Resource> downloadMergedPdf(
                     .body("Error highlighting word: " + e.getMessage());
         }
     }
-    @PostMapping("/merge")
-    public ResponseEntity<String> mergePdfs(
-            @RequestParam("pdfIds") String pdfIds,
-            @RequestParam("outputFileName") String outputFileName) {
+ 
+@PostMapping("/merge")
+public ResponseEntity<String> mergePdfs(
+        @RequestParam("pdfIds") String pdfIds,
+        @RequestParam("outputFileName") String outputFileName) {
 
-        try {
-            String savedPath = pdfMergeService.mergePdfs(pdfIds, outputFileName);
-            return ResponseEntity.ok("Merged PDF saved at: " + savedPath);
-        }  catch (Exception e) {
+    System.out.println("=== PDF MERGE REQUEST RECEIVED ===");
+
+    try {
+        String savedPath =
+                pdfMergeService.mergePdfs(pdfIds, outputFileName);
+
+        System.out.println("=== PDF MERGE SUCCESS ===");
+
+        return ResponseEntity.ok(
+                "Merged PDF saved at: " + savedPath
+        );
+
+    } catch (Exception e) {
+        System.err.println("=== PDF MERGE FAILED ===");
         e.printStackTrace();
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(null);
+                .body("PDF merge failed: "
+                        + e.getClass().getSimpleName()
+                        + ": " + e.getMessage());
     }
+}
 
-    }
     @PostMapping("/split/{id}")
     public ResponseEntity<?> splitPdf(
             @PathVariable("id") Long id,
