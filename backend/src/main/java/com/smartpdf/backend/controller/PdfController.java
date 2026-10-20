@@ -30,6 +30,7 @@ import com.smartpdf.backend.dto.PdfFormFillRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartpdf.backend.service.PdfBookmarkService;
+import com.smartpdf.backend.service.BackblazeStorageService;
 @RestController
 @RequestMapping("/api/pdfs")
 @CrossOrigin(origins = "*")
@@ -107,6 +108,8 @@ public class PdfController {
 private ObjectMapper objectMapper;
     @Autowired
     private PdfBookmarkService pdfBookmarkService;
+@Autowired
+private BackblazeStorageService storageService;
     //upload
   @PostMapping(
           value = "/upload",
@@ -237,37 +240,45 @@ private ObjectMapper objectMapper;
     }
 
     // Download merged PDF
-    @GetMapping("/download-merged/{fileName}")
-    public ResponseEntity<Resource> downloadMergedPdf(
-            @PathVariable String fileName) {
+  
+@GetMapping("/download-merged/{fileName}")
+public ResponseEntity<Resource> downloadMergedPdf(
+        @PathVariable String fileName) {
 
-        try {
+    try {
+        // Find the merged PDF record in the database
+        PdfFile pdf = pdfRepository.findAll()
+                .stream()
+                .filter(p -> fileName.equals(p.getFileName()))
+                .findFirst()
+                .orElse(null);
 
-            Path filePath = Paths.get("uploads").resolve(fileName).normalize();
-
-            if (!Files.exists(filePath)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Resource resource = new FileSystemResource(filePath);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .header(
-                            HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + fileName + "\""
-                    )
-                    .body(resource);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .build();
+        if (pdf == null || pdf.getFilePath() == null
+                || pdf.getFilePath().isBlank()) {
+            return ResponseEntity.notFound().build();
         }
+
+        // Download the PDF from Backblaze B2
+        Path downloadedFile =
+                storageService.downloadFile(pdf.getFilePath());
+
+        Resource resource = new FileSystemResource(downloadedFile);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + pdf.getFileName() + "\""
+                )
+                .body(resource);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build();
     }
+}
+
     // ============================================================
 // Preview PDF
 // ============================================================
