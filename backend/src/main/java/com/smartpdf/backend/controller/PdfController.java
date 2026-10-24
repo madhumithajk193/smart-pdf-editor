@@ -179,31 +179,46 @@ private BackblazeStorageService storageService;
     }
 
     // Download PDF
-    @GetMapping("/download/{id}")
-    public ResponseEntity<Resource> downloadPdf(@PathVariable Long id) {
-        try {
-            PdfFile pdf = pdfService.getPdfById(id);
-            if (pdf == null) {
-                return ResponseEntity.notFound().build();
-            }
+  
+@GetMapping("/download/{id}")
+public ResponseEntity<Resource> downloadPdf(
+        @PathVariable Long id) {
 
-            Path filePath = Paths.get(pdf.getFilePath());
-            if (!Files.exists(filePath)) {
-                return ResponseEntity.notFound().build();
-            }
+    try {
+        PdfFile pdf = pdfService.getPdfById(id);
 
-            Resource resource = new FileSystemResource(filePath);
+        if (pdf == null ||
+                pdf.getFilePath() == null ||
+                pdf.getFilePath().isBlank()) {
 
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + pdf.getFileName() + "\"")
-                    .body(resource);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.notFound().build();
         }
+
+        // Retrieve the PDF from Backblaze B2
+        Path downloadedFile = storageService.downloadFile(
+                pdf.getFilePath()
+        );
+
+        Resource resource =
+                new FileSystemResource(downloadedFile);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"download.pdf\""
+                )
+                .body(resource);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build();
     }
+}
+
     // Download generated PDF by file name
     @GetMapping("/download-file/{fileName:.+}")
     public ResponseEntity<Resource> downloadGeneratedPdf(
