@@ -261,7 +261,10 @@ public ResponseEntity<Resource> downloadMergedPdf(
         // Download the PDF from Backblaze B2
         Path downloadedFile =
                 storageService.downloadFile(pdf.getFilePath());
-
+System.out.println("VIEW PDF: Backblaze download successful");
+System.out.println("VIEW PDF: Temporary file = " + downloadedFile);
+System.out.println("VIEW PDF: File exists = " + Files.exists(downloadedFile));
+System.out.println("VIEW PDF: File size = " + Files.size(downloadedFile));
         Resource resource = new FileSystemResource(downloadedFile);
 
         return ResponseEntity.ok()
