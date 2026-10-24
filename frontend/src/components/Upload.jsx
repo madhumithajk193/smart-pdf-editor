@@ -1,5 +1,7 @@
 import { useState } from "react";
-
+const API_BASE_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://smart-pdf-editor-backend.onrender.com";
 function Upload({ onUploadSuccess }) {
 
     const [file, setFile] = useState(null);
@@ -57,13 +59,13 @@ function Upload({ onUploadSuccess }) {
             setMessage("Uploading...");
 
 
-            const response = await fetch(
-                "http://localhost:8080/api/pdfs/upload",
-                {
-                    method: "POST",
-                    body: formData
-                }
-            );
+         const response = await fetch(
+    `${API_BASE_URL}/api/pdfs/upload`,
+    {
+        method: "POST",
+        body: formData
+    }
+);
 
 
             if (response.ok) {
