@@ -1,5 +1,7 @@
 import { useState } from "react";
-
+const API_BASE_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://smart-pdf-editor-backend.onrender.com";
 function PdfTable({ pdfList, onDelete }) {
 
     const [message, setMessage] = useState("");
@@ -17,11 +19,11 @@ function PdfTable({ pdfList, onDelete }) {
         try {
 
             const response = await fetch(
-                `http://localhost:8080/api/pdfs/${id}`,
-                {
-                    method: "DELETE"
-                }
-            );
+    `${API_BASE_URL}/api/pdfs/${id}`,
+    {
+        method: "DELETE"
+    }
+);
 
             if (response.ok) {
 
@@ -46,24 +48,20 @@ function PdfTable({ pdfList, onDelete }) {
         }
 
     };
-
-    const handleView = (id) => {
-
-        window.open(
-            `http://localhost:8080/api/pdfs/view/${id}`,
-            "_blank"
-        );
-
-    };
-
-    const handleDownload = (id) => {
-
-        window.open(
-            `http://localhost:8080/api/pdfs/download/${id}`,
-            "_blank"
-        );
-
-    };
+const handleView = (id) => {
+    window.open(
+        `${API_BASE_URL}/api/pdfs/view/${id}`,
+        "_blank"
+    );
+};
+   
+const handleDownload = (id) => {
+    window.open(
+        `${API_BASE_URL}/api/pdfs/download/${id}`,
+        "_blank"
+    );
+};
+   
 
     return (
 
