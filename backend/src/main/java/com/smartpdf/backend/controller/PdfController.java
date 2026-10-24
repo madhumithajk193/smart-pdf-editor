@@ -282,156 +282,51 @@ public ResponseEntity<Resource> downloadMergedPdf(
     // ============================================================
 // Preview PDF
 // ============================================================
+@GetMapping("/view/{id}")
+public ResponseEntity<Resource> viewPdf(
+        @PathVariable Long id) {
 
-    @GetMapping("/view/{id}")
-    public ResponseEntity<Resource> viewPdf(
-            @PathVariable Long id) {
+    Path downloadedFile = null;
 
-        try {
+    try {
+        // Find PDF record in database
+        PdfFile pdf = pdfService.getPdfById(id);
 
-            System.out.println("=================================");
-            System.out.println("VIEW PDF REQUEST");
-            System.out.println("PDF ID = " + id);
+        if (pdf == null ||
+                pdf.getFilePath() == null ||
+                pdf.getFilePath().isBlank()) {
 
-            PdfFile pdf =
-                    pdfService.getPdfById(id);
-
-            // ----------------------------------------------------
-            // Check database record
-            // ----------------------------------------------------
-
-            if (pdf == null) {
-
-                System.out.println(
-                        "PDF NOT FOUND IN DATABASE: " + id
-                );
-
-                return ResponseEntity
-                        .notFound()
-                        .build();
-            }
-
-
-            System.out.println(
-                    "PDF FILE NAME = "
-                            + pdf.getFileName()
-            );
-
-            System.out.println(
-                    "PDF FILE PATH = "
-                            + pdf.getFilePath()
-            );
-
-
-            // ----------------------------------------------------
-            // Check file path
-            // ----------------------------------------------------
-
-            if (pdf.getFilePath() == null ||
-                    pdf.getFilePath().trim().isEmpty()) {
-
-                System.out.println(
-                        "PDF FILE PATH IS EMPTY"
-                );
-
-                return ResponseEntity
-                        .status(
-                                HttpStatus.INTERNAL_SERVER_ERROR
-                        )
-                        .build();
-            }
-
-
-            Path filePath =
-                    Paths.get(
-                            pdf.getFilePath()
-                    ).toAbsolutePath().normalize();
-
-
-            System.out.println(
-                    "ABSOLUTE FILE PATH = "
-                            + filePath
-            );
-
-
-            // ----------------------------------------------------
-            // Check physical file
-            // ----------------------------------------------------
-
-            if (!Files.exists(filePath)) {
-
-                System.out.println(
-                        "PDF FILE DOES NOT EXIST:"
-                );
-
-                System.out.println(
-                        filePath
-                );
-
-                return ResponseEntity
-                        .notFound()
-                        .build();
-            }
-
-
-            if (!Files.isRegularFile(filePath)) {
-
-                System.out.println(
-                        "PATH IS NOT A FILE:"
-                );
-
-                System.out.println(
-                        filePath
-                );
-
-                return ResponseEntity
-                        .notFound()
-                        .build();
-            }
-
-
-            // ----------------------------------------------------
-            // Create resource
-            // ----------------------------------------------------
-
-            Resource resource =
-                    new FileSystemResource(
-                            filePath
-                    );
-
-
-            // ----------------------------------------------------
-            // Return PDF inline
-            // ----------------------------------------------------
-
-            return ResponseEntity
-                    .ok()
-                    .contentType(
-                            MediaType.APPLICATION_PDF
-                    )
-                    .contentLength(
-                            Files.size(filePath)
-                    )
-                    .header(
-                            HttpHeaders.CONTENT_DISPOSITION,
-                            "inline; filename=\"" +
-                                    pdf.getFileName() +
-                                    "\""
-                    )
-                    .body(resource);
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .status(
-                            HttpStatus.INTERNAL_SERVER_ERROR
-                    )
-                    .build();
+            return ResponseEntity.notFound().build();
         }
+
+        // Download PDF from Backblaze B2
+        downloadedFile = storageService.downloadFile(
+                pdf.getFilePath()
+        );
+
+        // Create resource
+        Resource resource =
+                new FileSystemResource(downloadedFile);
+
+        // Display PDF in browser
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(Files.size(downloadedFile))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"preview.pdf\""
+                )
+                .body(resource);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build();
     }
+}
 
     // Extract text from PDF
     @GetMapping("/text/{id}")
