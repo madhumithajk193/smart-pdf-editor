@@ -1,3 +1,4 @@
+
 package com.smartpdf.backend.service;
 
 import com.smartpdf.backend.entity.PdfFile;
@@ -23,10 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
@@ -35,20 +32,21 @@ public class PdfService {
     @Autowired
     private PdfRepository pdfRepository;
 
-    private final Path uploadDir =
-            Paths.get(System.getProperty("user.dir"))
-                    .resolve("uploads")
-                    .toAbsolutePath()
-                    .normalize();
+    @Autowired
+    private BackblazeStorageService storageService;
+
+
+    // =========================================================
+    // 1. UPLOAD PDF, WORD AND EXCEL FILES TO BACKBLAZE
+    // =========================================================
 
     public PdfFile uploadPdf(MultipartFile file) throws IOException {
 
         if (file == null || file.isEmpty()) {
-            throw new IOException("Please select a PDF, Word or Excel file");
+            throw new IOException(
+                    "Please select a PDF, Word or Excel file"
+            );
         }
-
-        // Create uploads directory
-        Files.createDirectories(uploadDir);
 
         // Get original filename
         String originalFileName = file.getOriginalFilename();
@@ -58,7 +56,7 @@ public class PdfService {
         }
 
         // Remove directory information
-        originalFileName = Paths.get(originalFileName)
+        originalFileName = java.nio.file.Paths.get(originalFileName)
                 .getFileName()
                 .toString();
 
@@ -77,38 +75,20 @@ public class PdfService {
             );
         }
 
-        /*
-         * IMPORTANT:
-         * Create a unique stored filename.
-         *
-         * Example:
-         * employees.pdf
-         * becomes
-         * 8f4a7c2e-employees.pdf
-         */
-        String uniqueFileName =
-                java.util.UUID.randomUUID() + "_" + originalFileName;
+        // Upload directly to Backblaze B2
+        String objectKey = storageService.uploadFile(file);
 
-        Path filePath = uploadDir
-                .resolve(uniqueFileName)
-                .normalize();
-
-        // Save uploaded file
-        try (java.io.InputStream inputStream = file.getInputStream()) {
-
-            Files.copy(
-                    inputStream,
-                    filePath
+        if (objectKey == null || objectKey.isBlank()) {
+            throw new IOException(
+                    "Backblaze upload failed: No object key returned"
             );
         }
 
         System.out.println("=================================");
-        System.out.println("FILE UPLOAD SUCCESS");
+        System.out.println("BACKBLAZE UPLOAD SUCCESS");
         System.out.println("Original name : " + originalFileName);
-        System.out.println("Stored name   : " + uniqueFileName);
-        System.out.println("File path     : " + filePath);
+        System.out.println("B2 object key : " + objectKey);
         System.out.println("File size     : " + file.getSize());
-        System.out.println("Exists        : " + Files.exists(filePath));
         System.out.println("=================================");
 
         // Save information in database
@@ -117,12 +97,18 @@ public class PdfService {
         // Keep original filename for displaying to user
         pdf.setFileName(originalFileName);
 
-        // Store actual unique file path
-        pdf.setFilePath(filePath.toString());
+        // IMPORTANT: Save the exact Backblaze object key
+        pdf.setFilePath(objectKey);
 
         pdf.setFileSize(file.getSize());
 
-        return pdfRepository.save(pdf);
+        PdfFile savedPdf = pdfRepository.save(pdf);
+
+        System.out.println("DATABASE SAVE SUCCESS");
+        System.out.println("Database ID : " + savedPdf.getId());
+        System.out.println("Saved path  : " + savedPdf.getFilePath());
+
+        return savedPdf;
     }
 
 
@@ -134,9 +120,11 @@ public class PdfService {
         return pdfRepository.findAll();
     }
 
+
     // =========================================================
     // 3. GET PDF BY ID
     // =========================================================
+
     public PdfFile getPdfById(Long id) {
 
         System.out.println("Looking for PDF ID: " + id);
@@ -148,14 +136,12 @@ public class PdfService {
         if (pdf == null) {
 
             System.out.println(
-                    "❌ PDF ID NOT FOUND IN DATABASE: " + id
+                    "PDF ID NOT FOUND IN DATABASE: " + id
             );
 
         } else {
 
-            System.out.println(
-                    "✅ PDF FOUND"
-            );
+            System.out.println("PDF FOUND");
 
             System.out.println(
                     "File name: " + pdf.getFileName()
@@ -169,8 +155,9 @@ public class PdfService {
         return pdf;
     }
 
+
     // =========================================================
-    // 4. DELETE PDF
+    // 4. DELETE PDF FROM BACKBLAZE AND DATABASE
     // =========================================================
 
     public void deletePdf(Long id) throws IOException {
@@ -183,13 +170,25 @@ public class PdfService {
             throw new IOException("PDF not found");
         }
 
-        Path filePath =
-                Paths.get(pdf.getFilePath());
+        String objectKey = pdf.getFilePath();
 
-        Files.deleteIfExists(filePath);
+        if (objectKey == null || objectKey.isBlank()) {
+            throw new IOException("File storage key not found");
+        }
 
+        // Delete the actual file from Backblaze B2
+        storageService.deleteFile(objectKey);
+
+        // Delete database record after storage deletion succeeds
         pdfRepository.deleteById(id);
+
+        System.out.println("=================================");
+        System.out.println("PDF DELETE SUCCESS");
+        System.out.println("Database ID : " + id);
+        System.out.println("B2 object key : " + objectKey);
+        System.out.println("=================================");
     }
+
 
     // =========================================================
     // 5. EXCEL TO PDF
@@ -198,10 +197,7 @@ public class PdfService {
     public byte[] convertExcelToPdf(MultipartFile file)
             throws IOException {
 
-        // -----------------------------------------------------
         // Check file
-        // -----------------------------------------------------
-
         if (file == null || file.isEmpty()) {
             throw new IOException(
                     "Please select an Excel file"
@@ -219,10 +215,7 @@ public class PdfService {
             );
         }
 
-        // -----------------------------------------------------
         // Check extension
-        // -----------------------------------------------------
-
         String lowerName =
                 originalFileName.toLowerCase();
 
@@ -240,10 +233,7 @@ public class PdfService {
         System.out.println("Size       : " + file.getSize());
         System.out.println("=================================");
 
-        // -----------------------------------------------------
-        // Create Excel workbook
-        // -----------------------------------------------------
-
+        // Create Excel workbook and PDF document
         try (
                 Workbook workbook =
                         WorkbookFactory.create(
@@ -285,10 +275,7 @@ public class PdfService {
 
             float fontSize = 8;
 
-            // -------------------------------------------------
             // Process every Excel sheet
-            // -------------------------------------------------
-
             for (int sheetIndex = 0;
                  sheetIndex < workbook.getNumberOfSheets();
                  sheetIndex++) {
@@ -301,10 +288,7 @@ public class PdfService {
                                 + sheet.getSheetName()
                 );
 
-                // -------------------------------------------------
                 // Empty sheet
-                // -------------------------------------------------
-
                 if (sheet.getPhysicalNumberOfRows() == 0) {
 
                     PDPage page =
@@ -344,10 +328,7 @@ public class PdfService {
                     continue;
                 }
 
-                // -------------------------------------------------
                 // Find maximum columns
-                // -------------------------------------------------
-
                 int maxColumns = 0;
 
                 for (Row row : sheet) {
@@ -362,10 +343,7 @@ public class PdfService {
                     maxColumns = 1;
                 }
 
-                // -------------------------------------------------
                 // Calculate column width
-                // -------------------------------------------------
-
                 float columnWidth =
                         usableWidth / maxColumns;
 
@@ -374,10 +352,7 @@ public class PdfService {
                     columnWidth = 120;
                 }
 
-                // -------------------------------------------------
                 // Create first page
-                // -------------------------------------------------
-
                 PDPage page =
                         new PDPage(PDRectangle.A4);
 
@@ -392,10 +367,7 @@ public class PdfService {
                 float y =
                         pageHeight - margin;
 
-                // -------------------------------------------------
                 // Sheet title
-                // -------------------------------------------------
-
                 content.beginText();
 
                 content.setFont(
@@ -418,10 +390,7 @@ public class PdfService {
 
                 y -= 25;
 
-                // -------------------------------------------------
                 // Process rows
-                // -------------------------------------------------
-
                 for (Row row : sheet) {
 
                     // New page if required
@@ -446,10 +415,7 @@ public class PdfService {
                                 pageHeight - margin;
                     }
 
-                    // -------------------------------------------------
                     // Process cells
-                    // -------------------------------------------------
-
                     for (int column = 0;
                          column < maxColumns;
                          column++) {
@@ -487,10 +453,7 @@ public class PdfService {
                                 margin
                                         + (column * columnWidth);
 
-                        // -------------------------------------------------
                         // Cell border
-                        // -------------------------------------------------
-
                         content.addRect(
                                 x,
                                 y - rowHeight,
@@ -500,10 +463,7 @@ public class PdfService {
 
                         content.stroke();
 
-                        // -------------------------------------------------
                         // Cell text
-                        // -------------------------------------------------
-
                         if (!value.isEmpty()) {
 
                             content.beginText();
@@ -529,9 +489,7 @@ public class PdfService {
                                     y - 13
                             );
 
-                            content.showText(
-                                    value
-                            );
+                            content.showText(value);
 
                             content.endText();
                         }
@@ -543,10 +501,7 @@ public class PdfService {
                 content.close();
             }
 
-            // -----------------------------------------------------
             // Save PDF into memory
-            // -----------------------------------------------------
-
             document.save(output);
 
             byte[] pdfBytes =
@@ -579,6 +534,7 @@ public class PdfService {
             );
         }
     }
+
 
     // =========================================================
     // 6. CLEAN TEXT FOR PDF
