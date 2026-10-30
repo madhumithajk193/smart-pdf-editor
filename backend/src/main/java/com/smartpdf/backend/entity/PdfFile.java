@@ -1,3 +1,4 @@
+
 package com.smartpdf.backend.entity;
 
 import jakarta.persistence.*;
@@ -15,6 +16,10 @@ public class PdfFile {
     private String filePath;
 
     private Long fileSize;
+
+    // Identifies the guest who uploaded this file
+    @Column(name = "guest_id", length = 100)
+    private String guestId;
 
     public PdfFile() {
     }
@@ -49,5 +54,13 @@ public class PdfFile {
 
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getGuestId() {
+        return guestId;
+    }
+
+    public void setGuestId(String guestId) {
+        this.guestId = guestId;
     }
 }
