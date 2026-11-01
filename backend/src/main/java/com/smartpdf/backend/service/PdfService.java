@@ -40,7 +40,12 @@ public class PdfService {
     // 1. UPLOAD PDF, WORD AND EXCEL FILES TO BACKBLAZE
     // =========================================================
 
-    public PdfFile uploadPdf(MultipartFile file) throws IOException {
+    public PdfFile uploadPdf(MultipartFile file, String guestId)
+            throws IOException {
+
+        if (guestId == null || guestId.isBlank()) {
+            throw new IOException("Guest identity is missing");
+        }
 
         if (file == null || file.isEmpty()) {
             throw new IOException(
@@ -94,65 +99,53 @@ public class PdfService {
         // Save information in database
         PdfFile pdf = new PdfFile();
 
-        // Keep original filename for displaying to user
         pdf.setFileName(originalFileName);
-
-        // IMPORTANT: Save the exact Backblaze object key
         pdf.setFilePath(objectKey);
-
         pdf.setFileSize(file.getSize());
+
+        // Associate this file with its guest
+        pdf.setGuestId(guestId);
 
         PdfFile savedPdf = pdfRepository.save(pdf);
 
         System.out.println("DATABASE SAVE SUCCESS");
         System.out.println("Database ID : " + savedPdf.getId());
         System.out.println("Saved path  : " + savedPdf.getFilePath());
+        System.out.println("Guest ID    : " + savedPdf.getGuestId());
 
         return savedPdf;
     }
 
 
     // =========================================================
-    // 2. GET ALL PDFs
+    // 2. GET ALL PDFs BELONGING TO A GUEST
     // =========================================================
 
-    public List<PdfFile> getAllPdfs() {
-        return pdfRepository.findAll();
+    public List<PdfFile> getAllPdfs(String guestId) {
+
+        if (guestId == null || guestId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Guest identity is missing"
+            );
+        }
+
+        return pdfRepository.findAllByGuestId(guestId);
     }
 
 
     // =========================================================
-    // 3. GET PDF BY ID
+    // 3. GET PDF BY ID AND GUEST ID
     // =========================================================
 
-    public PdfFile getPdfById(Long id) {
+    public PdfFile getPdfById(Long id, String guestId) {
 
-        System.out.println("Looking for PDF ID: " + id);
-
-        PdfFile pdf = pdfRepository
-                .findById(id)
-                .orElse(null);
-
-        if (pdf == null) {
-
-            System.out.println(
-                    "PDF ID NOT FOUND IN DATABASE: " + id
-            );
-
-        } else {
-
-            System.out.println("PDF FOUND");
-
-            System.out.println(
-                    "File name: " + pdf.getFileName()
-            );
-
-            System.out.println(
-                    "File path: " + pdf.getFilePath()
-            );
+        if (id == null || guestId == null || guestId.isBlank()) {
+            return null;
         }
 
-        return pdf;
+        return pdfRepository
+                .findByIdAndGuestId(id, guestId)
+                .orElse(null);
     }
 
 
@@ -160,10 +153,14 @@ public class PdfService {
     // 4. DELETE PDF FROM BACKBLAZE AND DATABASE
     // =========================================================
 
-    public void deletePdf(Long id) throws IOException {
+    public void deletePdf(Long id, String guestId) throws IOException {
+
+        if (guestId == null || guestId.isBlank()) {
+            throw new IOException("Guest identity is missing");
+        }
 
         PdfFile pdf = pdfRepository
-                .findById(id)
+                .findByIdAndGuestId(id, guestId)
                 .orElse(null);
 
         if (pdf == null) {
@@ -179,8 +176,8 @@ public class PdfService {
         // Delete the actual file from Backblaze B2
         storageService.deleteFile(objectKey);
 
-        // Delete database record after storage deletion succeeds
-        pdfRepository.deleteById(id);
+        // Delete only this guest's database record
+        pdfRepository.deleteByIdAndGuestId(id, guestId);
 
         System.out.println("=================================");
         System.out.println("PDF DELETE SUCCESS");
