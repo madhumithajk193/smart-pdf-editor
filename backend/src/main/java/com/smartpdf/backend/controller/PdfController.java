@@ -1544,7 +1544,7 @@ public ResponseEntity<String> mergePdfs(
                 outputFileName += ".pdf";
             }
 
-            PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId())
+            PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
 
             if (pdf == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
