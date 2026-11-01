@@ -31,6 +31,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartpdf.backend.service.PdfBookmarkService;
 import com.smartpdf.backend.service.BackblazeStorageService;
+import jakarta.servlet.http.HttpServletRequest;
+import com.smartpdf.backend.filter.GuestIdentityFilter;
 @RestController
 @RequestMapping("/api/pdfs")
 @CrossOrigin(origins = "*")
@@ -377,41 +379,50 @@ public ResponseEntity<Resource> viewPdf(
                     .body("Error creating edited PDF: " + e.getMessage());
         }
     }
-    @PostMapping("/add-text/{id}")
-    public ResponseEntity<String> addTextToPdf(
-            @PathVariable Long id,
-            @RequestParam("text") String text,
-            @RequestParam("pageNumber") int pageNumber,
-            @RequestParam("x") float x,
-            @RequestParam("y") float y,
-            @RequestParam("fontSize") float fontSize,
-            @RequestParam("outputFileName") String outputFileName) {
+   @PostMapping("/add-text/{id}")
+public ResponseEntity<String> addTextToPdf(
+        @PathVariable Long id,
+        @RequestParam("text") String text,
+        @RequestParam("pageNumber") int pageNumber,
+        @RequestParam("x") float x,
+        @RequestParam("y") float y,
+        @RequestParam("fontSize") float fontSize,
+        @RequestParam("outputFileName") String outputFileName,
+        HttpServletRequest request) {
 
-        try {
+    try {
+        String guestId = (String) request.getAttribute(
+                GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
 
-            String savedPath = pdfModifyService.addTextToPdf(
-                    id,
-                    text,
-                    pageNumber,
-                    x,
-                    y,
-                    fontSize,
-                    outputFileName
-            );
-
-            return ResponseEntity.ok(
-                    "Text added successfully. PDF saved at: " + savedPath
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error adding text to PDF: " + e.getMessage());
+        if (guestId == null || guestId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Guest identity is missing.");
         }
+
+        String savedPath = pdfModifyService.addTextToPdf(
+                id,
+                guestId,
+                text,
+                pageNumber,
+                x,
+                y,
+                fontSize,
+                outputFileName
+        );
+
+        return ResponseEntity.ok(
+                "Text added successfully. PDF saved at: " + savedPath
+        );
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error adding text to PDF: " + e.getMessage());
     }
+}
     // Delete PDF
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePdf(@PathVariable Long id) {
