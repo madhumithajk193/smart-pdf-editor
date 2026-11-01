@@ -33,6 +33,8 @@ import com.smartpdf.backend.service.PdfBookmarkService;
 import com.smartpdf.backend.service.BackblazeStorageService;
 import jakarta.servlet.http.HttpServletRequest;
 import com.smartpdf.backend.filter.GuestIdentityFilter;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 @RestController
 @RequestMapping("/api/pdfs")
 @CrossOrigin(origins = "*")
@@ -1834,4 +1836,27 @@ public ResponseEntity<String> mergePdfs(
                     );
         }
     }
+    private String getCurrentGuestId() {
+
+    ServletRequestAttributes attributes =
+            (ServletRequestAttributes)
+                    RequestContextHolder.getRequestAttributes();
+
+    if (attributes == null) {
+        throw new IllegalStateException(
+                "Guest identity is unavailable."
+        );
+    }
+
+    HttpServletRequest request = attributes.getRequest();
+
+String guestId = getCurrentGuestId();
+    if (guestId == null || guestId.isBlank()) {
+        throw new IllegalStateException(
+                "Guest identity is missing."
+        );
+    }
+
+    return guestId;
+}
 }
