@@ -426,22 +426,27 @@ public ResponseEntity<String> addTextToPdf(
     }
 }
     // Delete PDF
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePdf(@PathVariable Long id) {
-        try {
-            PdfFile pdf = pdfService.getPdfById(id);
-            if (pdf == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PDF not found");
-            }
+@DeleteMapping("/{id}")
+public ResponseEntity<String> deletePdf(@PathVariable Long id) {
+    try {
+        String guestId = getCurrentGuestId();
 
-            pdfService.deletePdf(id);
-            return ResponseEntity.ok("PDF deleted successfully");
+        PdfFile pdf = pdfService.getPdfById(id, guestId);
 
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error deleting PDF: " + e.getMessage());
+        if (pdf == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("PDF not found");
         }
+
+        pdfService.deletePdf(id, guestId);
+
+        return ResponseEntity.ok("PDF deleted successfully");
+
+    } catch (IOException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error deleting PDF: " + e.getMessage());
     }
+}
     @PostMapping("/highlight/{id}")
     public ResponseEntity<String> highlightArea(
             @PathVariable Long id,
@@ -1539,7 +1544,7 @@ public ResponseEntity<String> mergePdfs(
                 outputFileName += ".pdf";
             }
 
-            PdfFile pdf = pdfService.getPdfById(id);
+            PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId())
 
             if (pdf == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -1850,7 +1855,9 @@ public ResponseEntity<String> mergePdfs(
 
     HttpServletRequest request = attributes.getRequest();
 
-String guestId = getCurrentGuestId();
+   String guestId = (String) attributes.getRequest().getAttribute(
+            GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+    );
     if (guestId == null || guestId.isBlank()) {
         throw new IllegalStateException(
                 "Guest identity is missing."
