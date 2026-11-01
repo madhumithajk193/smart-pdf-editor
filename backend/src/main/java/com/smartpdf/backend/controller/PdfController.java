@@ -175,7 +175,7 @@ private BackblazeStorageService storageService;
     // Get PDF by ID
     @GetMapping("/{id}")
     public ResponseEntity<PdfFile> getPdfById(@PathVariable Long id) {
-        PdfFile pdf = pdfService.getPdfById(id);
+        PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
         if (pdf == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -189,7 +189,7 @@ public ResponseEntity<Resource> downloadPdf(
         @PathVariable Long id) {
 
     try {
-        PdfFile pdf = pdfService.getPdfById(id);
+        PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
 
         if (pdf == null ||
                 pdf.getFilePath() == null ||
@@ -312,7 +312,7 @@ public ResponseEntity<Resource> viewPdf(
 
     try {
         // Find PDF record in database
-        PdfFile pdf = pdfService.getPdfById(id);
+        PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
 
         if (pdf == null ||
                 pdf.getFilePath() == null ||
@@ -354,7 +354,7 @@ public ResponseEntity<Resource> viewPdf(
     @GetMapping("/text/{id}")
     public ResponseEntity<String> extractPdfText(@PathVariable Long id) {
         try {
-            PdfFile pdf = pdfService.getPdfById(id);
+            PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
             if (pdf == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PDF not found");
             }
@@ -431,7 +431,7 @@ public ResponseEntity<String> deletePdf(@PathVariable Long id) {
     try {
         String guestId = getCurrentGuestId();
 
-        PdfFile pdf = pdfService.getPdfById(id, guestId);
+        PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
 
         if (pdf == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -1449,8 +1449,7 @@ public ResponseEntity<String> mergePdfs(
             /*
              * Find PDF from database.
              */
-            PdfFile pdf =
-                    pdfService.getPdfById(id);
+            PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
 
             if (pdf == null) {
 
