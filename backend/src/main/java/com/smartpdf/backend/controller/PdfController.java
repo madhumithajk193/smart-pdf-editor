@@ -144,7 +144,7 @@ private BackblazeStorageService storageService;
                       .body("Selected file is empty.");
           }
 
-          PdfFile uploadedPdf = pdfService.uploadPdf(file);
+          PdfFile uploadedPdf = pdfService.uploadPdf(file, getCurrentGuestId());
 
           System.out.println("UPLOAD SUCCESS");
           System.out.println("Database ID: " + uploadedPdf.getId());
@@ -167,10 +167,12 @@ private BackblazeStorageService storageService;
   }
 
     // Get all PDFs
-    @GetMapping
-    public ResponseEntity<List<PdfFile>> getAllPdfs() {
-        return ResponseEntity.ok(pdfService.getAllPdfs());
-    }
+   @GetMapping
+public ResponseEntity<List<PdfFile>> getAllPdfs() {
+    return ResponseEntity.ok(
+            pdfService.getAllPdfs(getCurrentGuestId())
+    );
+}
 
     // Get PDF by ID
     @GetMapping("/{id}")
