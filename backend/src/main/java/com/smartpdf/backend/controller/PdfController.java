@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartpdf.backend.service.PdfBookmarkService;
 import com.smartpdf.backend.service.BackblazeStorageService;
 import jakarta.servlet.http.HttpServletRequest;
-import com.smartpdf.backend.filter.GuestIdentityFilter;
+import com.smartpdf.backend.security.GuestIdentityFilter;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 @RestController
