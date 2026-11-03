@@ -62,9 +62,12 @@ function App() {
 
         try {
 
-          
 const response = await fetch(
-    "https://smart-pdf-editor-backend.onrender.com/api/pdfs"
+    "https://smart-pdf-editor-backend.onrender.com/api/pdfs",
+    {
+        method: "GET",
+        credentials: "include"
+    }
 );
 
 
