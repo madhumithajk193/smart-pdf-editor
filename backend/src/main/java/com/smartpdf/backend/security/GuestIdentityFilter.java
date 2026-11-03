@@ -51,7 +51,7 @@ public class GuestIdentityFilter extends OncePerRequestFilter {
                             + "; Max-Age=2592000"
                             + "; HttpOnly"
                             + "; Secure"
-                            + "; SameSite=Lax"
+                            + "; SameSite=None"
             );
         }
 
