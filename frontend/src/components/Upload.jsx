@@ -59,14 +59,14 @@ function Upload({ onUploadSuccess }) {
             setMessage("Uploading...");
 
 
-         const response = await fetch(
+    const response = await fetch(
     `${API_BASE_URL}/api/pdfs/upload`,
     {
         method: "POST",
-        body: formData
+        body: formData,
+        credentials: "include"
     }
 );
-
 
             if (response.ok) {
 
