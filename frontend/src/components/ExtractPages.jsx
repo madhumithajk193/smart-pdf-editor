@@ -73,8 +73,7 @@ function ExtractPages({ pdfList = [], onExtractSuccess }) {
             setMessage("PDF pages extracted successfully!");
 
             // Retain the requested filename.
-            setExtractedFileName(fileName);
-
+           setExtractedFileName(result.trim());
             setPages("");
 
             if (onExtractSuccess) {
