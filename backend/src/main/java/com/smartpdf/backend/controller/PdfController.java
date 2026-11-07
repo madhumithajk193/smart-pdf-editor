@@ -513,39 +513,43 @@ public ResponseEntity<String> mergePdfs(
     }
 }
 
-    @PostMapping("/split/{id}")
-    public ResponseEntity<?> splitPdf(
-            @PathVariable("id") Long id,
-            @RequestParam("pages") String pages,
-            @RequestParam("outputPrefix") String outputPrefix) {
+@PostMapping("/split/{id}")
+public ResponseEntity<?> splitPdf(
+        @PathVariable("id") Long id,
+        @RequestParam("pages") String pages,
+        @RequestParam("outputPrefix") String outputPrefix,
+        HttpServletRequest request) {
 
-        try {
+    try {
 
-            System.out.println("========== SPLIT PDF ==========");
-            System.out.println("PDF ID       : " + id);
-            System.out.println("Pages        : " + pages);
-            System.out.println("Output Prefix: " + outputPrefix);
+        String guestId = (String) request.getAttribute(
+                com.smartpdf.backend.security.GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
 
-            List<String> result =
-                    pdfSplitService.splitPdf(
-                            id,
-                            pages,
-                            outputPrefix
-                    );
-
-            System.out.println("Split Result : " + result);
-
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error splitting PDF: " + e.getMessage());
+        if (guestId == null || guestId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Guest identity is missing.");
         }
+
+        List<String> result = pdfSplitService.splitPdf(
+                id,
+                pages,
+                outputPrefix,
+                guestId
+        );
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Error splitting PDF: " + e.getMessage());
     }
+}
+
     @PostMapping("/delete-pages/{id}")
     public ResponseEntity<?> deletePages(
             @PathVariable("id") Long id,
