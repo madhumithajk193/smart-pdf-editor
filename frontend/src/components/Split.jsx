@@ -8,8 +8,9 @@ function Split({ pdfList = [], onSplitSuccess }) {
     const [outputPrefix, setOutputPrefix] = useState("split");
     const [message, setMessage] = useState("");
     const [splitFiles, setSplitFiles] = useState([]);
+    const [isSplitting, setIsSplitting] = useState(false);
 
-    // Use the deployed backend URL in production.
+    // Deployed backend URL
     const API_URL = (
         import.meta.env.VITE_API_URL ||
         "https://smart-pdf-editor-backend.onrender.com"
@@ -37,6 +38,10 @@ function Split({ pdfList = [], onSplitSuccess }) {
         formData.append("pages", splitPages);
         formData.append("outputPrefix", outputPrefix);
 
+        setIsSplitting(true);
+        setMessage("");
+        setSplitFiles([]);
+
         try {
 
             const response = await fetch(
@@ -58,34 +63,31 @@ function Split({ pdfList = [], onSplitSuccess }) {
                 result = responseText;
             }
 
-            if (response.ok) {
-
-                if (!Array.isArray(result)) {
-                    throw new Error(
-                        "Unexpected response from the backend."
-                    );
-                }
-
-                setMessage("PDF split successfully!");
-                setSplitFiles(result);
-
-                if (onSplitSuccess) {
-                    onSplitSuccess();
-                }
-
-                console.log("Split files:", result);
-
-            } else {
-
-                setMessage(
+            if (!response.ok) {
+                throw new Error(
                     typeof result === "string"
                         ? result
-                        : "Error splitting PDF."
+                        : `Error splitting PDF (${response.status}).`
                 );
-
-                setSplitFiles([]);
-
             }
+
+            if (!Array.isArray(result)) {
+                throw new Error(
+                    "Unexpected response from the backend."
+                );
+            }
+
+            setSplitFiles(result);
+
+            setMessage(
+                `PDF split successfully! ${result.length} file(s) created.`
+            );
+
+            if (onSplitSuccess) {
+                onSplitSuccess();
+            }
+
+            console.log("Split files:", result);
 
         } catch (error) {
 
@@ -97,10 +99,15 @@ function Split({ pdfList = [], onSplitSuccess }) {
 
             setSplitFiles([]);
 
+        } finally {
+
+            setIsSplitting(false);
+
         }
 
     };
 
+    // Backend now returns filenames directly.
     const getFileName = (filePath) => {
 
         if (!filePath) {
@@ -148,9 +155,16 @@ function Split({ pdfList = [], onSplitSuccess }) {
 
             </div>
 
+            {/* Select PDF */}
+
             <select
                 value={splitPdfId}
-                onChange={(e) => setSplitPdfId(e.target.value)}
+                onChange={(e) => {
+                    setSplitPdfId(e.target.value);
+                    setMessage("");
+                    setSplitFiles([]);
+                }}
+                disabled={isSplitting}
             >
 
                 <option value="">
@@ -173,35 +187,50 @@ function Split({ pdfList = [], onSplitSuccess }) {
             <br />
             <br />
 
+            {/* Pages */}
+
             <input
                 type="text"
                 value={splitPages}
                 onChange={(e) => setSplitPages(e.target.value)}
                 placeholder="Pages (Example: 1-3 or 2,4)"
+                disabled={isSplitting}
             />
 
             <br />
             <br />
+
+            {/* Output Prefix */}
 
             <input
                 type="text"
                 value={outputPrefix}
                 onChange={(e) => setOutputPrefix(e.target.value)}
                 placeholder="Output Prefix"
+                disabled={isSplitting}
             />
 
             <br />
             <br />
 
-            <button onClick={handleSplit}>
-                Split PDF
+            <button
+                onClick={handleSplit}
+                disabled={isSplitting}
+            >
+                {isSplitting ? "Splitting..." : "Split PDF"}
             </button>
 
+            {/* Message */}
+
             {message && (
+
                 <p role="status" aria-live="polite">
                     {message}
                 </p>
+
             )}
+
+            {/* Generated Files */}
 
             {splitFiles.length > 0 && (
 
