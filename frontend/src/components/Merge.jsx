@@ -8,8 +8,6 @@ function Merge({ pdfList = [], onMergeSuccess }) {
     const [mergedFileName, setMergedFileName] = useState("");
     const [isMerging, setIsMerging] = useState(false);
 
-    // Use the deployed backend URL in production.
-    // Set VITE_API_URL in your frontend deployment environment.
     const API_URL = (
         import.meta.env.VITE_API_URL || "http://localhost:8080"
     ).replace(/\/+$/, "");
@@ -37,15 +35,12 @@ function Merge({ pdfList = [], onMergeSuccess }) {
             fileName += ".pdf";
         }
 
-        // Avoid sending an unsafe output filename.
         if (/[<>:"/\\|?*\x00-\x1F]/.test(fileName)) {
             setMessage("Please enter a valid PDF filename.");
             return;
         }
 
         const formData = new FormData();
-
-        // Send EVERY selected PDF ID, preserving the selected order.
         formData.append("pdfIds", selectedPdfs.join(","));
         formData.append("outputFileName", fileName);
 
@@ -58,7 +53,8 @@ function Merge({ pdfList = [], onMergeSuccess }) {
                 `${API_URL}/api/pdfs/merge`,
                 {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    credentials: "include"
                 }
             );
 
@@ -70,7 +66,19 @@ function Merge({ pdfList = [], onMergeSuccess }) {
                 );
             }
 
-            setMergedFileName(fileName);
+            // Get the actual timestamp-prefixed filename from the backend.
+            const prefix = "Merged PDF saved at:";
+            const actualFileName = result.startsWith(prefix)
+                ? result.substring(prefix.length).trim()
+                : "";
+
+            if (!actualFileName) {
+                throw new Error(
+                    "Merge completed, but the backend did not return the saved filename."
+                );
+            }
+
+            setMergedFileName(actualFileName);
             setMessage(
                 `Successfully merged ${selectedPdfs.length} PDFs!`
             );
@@ -78,6 +86,7 @@ function Merge({ pdfList = [], onMergeSuccess }) {
             if (onMergeSuccess) {
                 onMergeSuccess();
             }
+
         } catch (error) {
             console.error("PDF merge error:", error);
             setMessage(
@@ -133,9 +142,7 @@ function Merge({ pdfList = [], onMergeSuccess }) {
                 ))}
             </select>
 
-            <p>
-                Selected: {selectedPdfs.length} PDF(s)
-            </p>
+            <p>Selected: {selectedPdfs.length} PDF(s)</p>
 
             <label htmlFor="merged-file-name">
                 Output filename
