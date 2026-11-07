@@ -670,35 +670,44 @@ public ResponseEntity<?> splitPdf(
                     );
         }
     }
-    @PostMapping("/extract-pages/{id}")
-    public ResponseEntity<?> extractPages(
-            @PathVariable("id") Long id,
-            @RequestParam("pages") String pages,
-            @RequestParam("outputFileName") String outputFileName) {
+   
+@PostMapping("/extract-pages/{id}")
+public ResponseEntity<?> extractPages(
+        @PathVariable("id") Long id,
+        @RequestParam("pages") String pages,
+        @RequestParam("outputFileName") String outputFileName,
+        HttpServletRequest request) {
 
-        try {
+    try {
 
-            String result = pdfExtractPagesService.extractPages(
-                    id,
-                    pages,
-                    outputFileName
-            );
+        String guestId = (String) request.getAttribute(
+                com.smartpdf.backend.security.GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
 
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(
-                            "Error extracting pages: "
-                                    + e.getMessage()
-                    );
+        if (guestId == null || guestId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Guest identity is missing.");
         }
 
+        String result = pdfExtractPagesService.extractPages(
+                id,
+                pages,
+                outputFileName,
+                guestId
+        );
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return ResponseEntity
+                .badRequest()
+                .body("Error extracting pages: " + e.getMessage());
     }
+}
+
     @PostMapping("/reorder/{id}")
     public ResponseEntity<?> reorderPages(
             @PathVariable("id") Long id,
