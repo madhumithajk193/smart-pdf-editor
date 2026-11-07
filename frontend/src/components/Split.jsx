@@ -1,12 +1,19 @@
+
 import { useState } from "react";
 
-function Split({ pdfList, onSplitSuccess }) {
+function Split({ pdfList = [], onSplitSuccess }) {
 
     const [splitPdfId, setSplitPdfId] = useState("");
     const [splitPages, setSplitPages] = useState("");
     const [outputPrefix, setOutputPrefix] = useState("split");
     const [message, setMessage] = useState("");
     const [splitFiles, setSplitFiles] = useState([]);
+
+    // Use the deployed backend URL in production.
+    const API_URL = (
+        import.meta.env.VITE_API_URL ||
+        "https://smart-pdf-editor-backend.onrender.com"
+    ).replace(/\/+$/, "");
 
     const handleSplit = async () => {
 
@@ -33,10 +40,11 @@ function Split({ pdfList, onSplitSuccess }) {
         try {
 
             const response = await fetch(
-                `http://localhost:8080/api/pdfs/split/${splitPdfId}`,
+                `${API_URL}/api/pdfs/split/${splitPdfId}`,
                 {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    credentials: "include"
                 }
             );
 
@@ -51,12 +59,14 @@ function Split({ pdfList, onSplitSuccess }) {
             }
 
             if (response.ok) {
-                setMessage("PDF split successfully!");
 
-                /*
-                 * Backend returns a List<String>.
-                 * Each string is the path of a generated PDF.
-                 */
+                if (!Array.isArray(result)) {
+                    throw new Error(
+                        "Unexpected response from the backend."
+                    );
+                }
+
+                setMessage("PDF split successfully!");
                 setSplitFiles(result);
 
                 if (onSplitSuccess) {
@@ -79,9 +89,11 @@ function Split({ pdfList, onSplitSuccess }) {
 
         } catch (error) {
 
-            console.error(error);
+            console.error("PDF split error:", error);
 
-            setMessage("Cannot connect to backend.");
+            setMessage(
+                error.message || "Cannot connect to backend."
+            );
 
             setSplitFiles([]);
 
@@ -110,9 +122,14 @@ function Split({ pdfList, onSplitSuccess }) {
             return;
         }
 
+        const downloadUrl =
+            `${API_URL}/api/pdfs/download-merged/` +
+            encodeURIComponent(fileName);
+
         window.open(
-            `http://localhost:8080/api/pdfs/download-merged/${encodeURIComponent(fileName)}`,
-            "_blank"
+            downloadUrl,
+            "_blank",
+            "noopener,noreferrer"
         );
 
     };
@@ -130,8 +147,6 @@ function Split({ pdfList, onSplitSuccess }) {
                 </p>
 
             </div>
-
-            {/* Select PDF */}
 
             <select
                 value={splitPdfId}
@@ -158,8 +173,6 @@ function Split({ pdfList, onSplitSuccess }) {
             <br />
             <br />
 
-            {/* Pages */}
-
             <input
                 type="text"
                 value={splitPages}
@@ -169,8 +182,6 @@ function Split({ pdfList, onSplitSuccess }) {
 
             <br />
             <br />
-
-            {/* Output Prefix */}
 
             <input
                 type="text"
@@ -186,17 +197,11 @@ function Split({ pdfList, onSplitSuccess }) {
                 Split PDF
             </button>
 
-            {/* Message */}
-
             {message && (
-
-                <p>
+                <p role="status" aria-live="polite">
                     {message}
                 </p>
-
             )}
-
-            {/* Generated Files */}
 
             {splitFiles.length > 0 && (
 
