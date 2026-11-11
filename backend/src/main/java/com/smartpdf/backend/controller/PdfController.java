@@ -640,36 +640,46 @@ public ResponseEntity<?> splitPdf(
                     );
         }
     }
-    @PostMapping("/rotate/{id}")
-    public ResponseEntity<?> rotatePdf(
-            @PathVariable("id") Long id,
-            @RequestParam("pages") String pages,
-            @RequestParam("rotation") int rotation,
-            @RequestParam("outputFileName") String outputFileName) {
+  
+@PostMapping("/rotate/{id}")
+public ResponseEntity<?> rotatePdf(
+        @PathVariable("id") Long id,
+        @RequestParam("pages") String pages,
+        @RequestParam("rotation") int rotation,
+        @RequestParam("outputFileName") String outputFileName,
+        HttpServletRequest request) {
 
-        try {
+    try {
 
-            String result = pdfRotateService.rotatePdf(
-                    id,
-                    pages,
-                    rotation,
-                    outputFileName
-            );
+        String guestId = (String) request.getAttribute(
+                com.smartpdf.backend.security.GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
 
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(
-                            "Error rotating PDF: "
-                                    + e.getMessage()
-                    );
+        if (guestId == null || guestId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Guest identity is missing.");
         }
+
+        String result = pdfRotateService.rotatePdf(
+                id,
+                pages,
+                rotation,
+                outputFileName,
+                guestId
+        );
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return ResponseEntity
+                .badRequest()
+                .body("Error rotating PDF: " + e.getMessage());
     }
+}
+
    
 @PostMapping("/extract-pages/{id}")
 public ResponseEntity<?> extractPages(
