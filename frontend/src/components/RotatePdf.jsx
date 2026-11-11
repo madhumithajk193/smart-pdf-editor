@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 
-function RotatePdf({ pdfList, onRotateSuccess }) {
+function RotatePdf({ pdfList = [], onRotateSuccess }) {
 
     const [selectedPdf, setSelectedPdf] = useState("");
     const [pages, setPages] = useState("");
@@ -11,6 +12,13 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
     const [message, setMessage] = useState("");
     const [rotatedFileName, setRotatedFileName] =
         useState("");
+    const [isRotating, setIsRotating] = useState(false);
+
+    // Deployed Render backend URL
+    const API_URL = (
+        import.meta.env.VITE_API_URL ||
+        "https://smart-pdf-editor-backend.onrender.com"
+    ).replace(/\/+$/, "");
 
     const handleRotate = async () => {
 
@@ -20,75 +28,84 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
         }
 
         if (!pages.trim()) {
-            setMessage(
-                "Please enter the pages to rotate."
-            );
+            setMessage("Please enter the pages to rotate.");
             return;
         }
 
-        let fileName = outputFileName.trim();
-
-        if (!fileName) {
-            fileName = "rotated.pdf";
-        }
+        let fileName = outputFileName.trim() || "rotated.pdf";
 
         if (!fileName.toLowerCase().endsWith(".pdf")) {
             fileName += ".pdf";
         }
 
+        if (/[<>:"/\\|?*\x00-\x1F]/.test(fileName)) {
+            setMessage("Please enter a valid PDF filename.");
+            return;
+        }
+
         try {
+
+            setIsRotating(true);
+            setMessage("");
+            setRotatedFileName("");
 
             const formData = new FormData();
 
             formData.append("pages", pages);
             formData.append("rotation", rotation);
-            formData.append(
-                "outputFileName",
-                fileName
-            );
+            formData.append("outputFileName", fileName);
 
             const response = await fetch(
-                `http://localhost:8080/api/pdfs/rotate/${selectedPdf}`,
+                `${API_URL}/api/pdfs/rotate/${selectedPdf}`,
                 {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    credentials: "include"
                 }
             );
 
             const result = await response.text();
 
-            if (response.ok) {
-
-                setMessage(
-                    "PDF rotated successfully!"
+            if (!response.ok) {
+                throw new Error(
+                    result || `Rotation failed (${response.status}).`
                 );
+            }
 
-                setRotatedFileName(fileName);
+            // Use the actual filename returned by the backend.
+            const returnedFileName = result.trim();
 
-                setPages("");
+            const actualFileName = returnedFileName
+                ? returnedFileName
+                    .replace(/\\/g, "/")
+                    .split("/")
+                    .pop()
+                : fileName;
 
-                if (onRotateSuccess) {
-                    onRotateSuccess();
-                }
+            setRotatedFileName(actualFileName);
 
-            } else {
+            setMessage("PDF rotated successfully!");
 
-                setMessage(
-                    "Error rotating PDF: " + result
-                );
+            setPages("");
 
-                setRotatedFileName("");
+            if (onRotateSuccess) {
+                onRotateSuccess();
             }
 
         } catch (error) {
 
-            console.error(error);
+            console.error("PDF rotation error:", error);
 
             setMessage(
-                "Cannot connect to backend."
+                error.message || "Cannot connect to backend."
             );
 
             setRotatedFileName("");
+
+        } finally {
+
+            setIsRotating(false);
+
         }
     };
 
@@ -98,10 +115,16 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
             return;
         }
 
+        const downloadUrl =
+            `${API_URL}/api/pdfs/download-merged/` +
+            encodeURIComponent(rotatedFileName);
+
         window.open(
-            `http://localhost:8080/api/pdfs/download-merged/${encodeURIComponent(rotatedFileName)}`,
-            "_blank"
+            downloadUrl,
+            "_blank",
+            "noopener,noreferrer"
         );
+
     };
 
     return (
@@ -121,9 +144,12 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
 
             <select
                 value={selectedPdf}
-                onChange={(e) =>
-                    setSelectedPdf(e.target.value)
-                }
+                onChange={(e) => {
+                    setSelectedPdf(e.target.value);
+                    setMessage("");
+                    setRotatedFileName("");
+                }}
+                disabled={isRotating}
             >
 
                 <option value="">
@@ -149,10 +175,9 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
             <input
                 type="text"
                 value={pages}
-                onChange={(e) =>
-                    setPages(e.target.value)
-                }
+                onChange={(e) => setPages(e.target.value)}
                 placeholder="Pages (Example: 1,2,4)"
+                disabled={isRotating}
             />
 
             <br />
@@ -160,9 +185,8 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
 
             <select
                 value={rotation}
-                onChange={(e) =>
-                    setRotation(e.target.value)
-                }
+                onChange={(e) => setRotation(e.target.value)}
+                disabled={isRotating}
             >
 
                 <option value="90">
@@ -185,21 +209,25 @@ function RotatePdf({ pdfList, onRotateSuccess }) {
             <input
                 type="text"
                 value={outputFileName}
-                onChange={(e) =>
-                    setOutputFileName(e.target.value)
-                }
+                onChange={(e) => setOutputFileName(e.target.value)}
                 placeholder="Output file name"
+                disabled={isRotating}
             />
 
             <br />
             <br />
 
-            <button onClick={handleRotate}>
-                🔄 Rotate PDF
+            <button
+                onClick={handleRotate}
+                disabled={isRotating}
+            >
+                {isRotating ? "Rotating..." : "🔄 Rotate PDF"}
             </button>
 
             {message && (
-                <p>{message}</p>
+                <p role="status" aria-live="polite">
+                    {message}
+                </p>
             )}
 
             {rotatedFileName && (
