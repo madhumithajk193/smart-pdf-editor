@@ -20,4 +20,8 @@ public interface PdfRepository extends JpaRepository<PdfFile, Long> {
 
     // Delete only a file belonging to the guest
     void deleteByIdAndGuestId(Long id, String guestId);
+    Optional<PdfFile> findByFileNameAndGuestId(
+        String fileName,
+        String guestId
+);
 }
