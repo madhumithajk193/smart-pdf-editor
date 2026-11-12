@@ -261,17 +261,23 @@ public ResponseEntity<Resource> downloadPdf(
     }
 
     // Download merged PDF
-  
 @GetMapping("/download-merged/{fileName}")
 public ResponseEntity<Resource> downloadMergedPdf(
-        @PathVariable String fileName) {
+        @PathVariable String fileName,
+        HttpServletRequest request) {
 
     try {
-        // Find the merged PDF record in the database
-        PdfFile pdf = pdfRepository.findAll()
-                .stream()
-                .filter(p -> fileName.equals(p.getFileName()))
-                .findFirst()
+        String guestId = (String) request.getAttribute(
+                GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
+
+        if (guestId == null || guestId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Find the PDF belonging to this guest only
+        PdfFile pdf = pdfRepository
+                .findByFileNameAndGuestId(fileName, guestId)
                 .orElse(null);
 
         if (pdf == null || pdf.getFilePath() == null
@@ -279,27 +285,33 @@ public ResponseEntity<Resource> downloadMergedPdf(
             return ResponseEntity.notFound().build();
         }
 
-        // Download the PDF from Backblaze B2
+        // Download PDF from Backblaze B2
         Path downloadedFile =
                 storageService.downloadFile(pdf.getFilePath());
-System.out.println("VIEW PDF: Backblaze download successful");
-System.out.println("VIEW PDF: Temporary file = " + downloadedFile);
-System.out.println("VIEW PDF: File exists = " + Files.exists(downloadedFile));
-System.out.println("VIEW PDF: File size = " + Files.size(downloadedFile));
+
+        if (!Files.exists(downloadedFile)) {
+            return ResponseEntity.notFound().build();
+        }
+
         Resource resource = new FileSystemResource(downloadedFile);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + pdf.getFileName() + "\""
+                        ContentDisposition.attachment()
+                                .filename(pdf.getFileName())
+                                .build()
+                                .toString()
                 )
                 .body(resource);
 
     } catch (Exception e) {
         e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .build();
+
+        return ResponseEntity.status(
+                HttpStatus.INTERNAL_SERVER_ERROR
+        ).build();
     }
 }
 
