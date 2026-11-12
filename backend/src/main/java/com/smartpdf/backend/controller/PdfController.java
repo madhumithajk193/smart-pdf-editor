@@ -787,28 +787,40 @@ public ResponseEntity<?> extractPages(
         }
     }
     @PostMapping("/watermark/{id}")
-    public ResponseEntity<?> addWatermark(
-            @PathVariable Long id,
-            @RequestParam("watermarkText") String watermarkText,
-            @RequestParam("outputFileName") String outputFileName) {
+public ResponseEntity<?> addWatermark(
+        @PathVariable Long id,
+        @RequestParam("watermarkText") String watermarkText,
+        @RequestParam("outputFileName") String outputFileName,
+        HttpServletRequest request) {
 
-        try {
-            String result = pdfWatermarkService.addWatermark(
-                    id,
-                    watermarkText,
-                    outputFileName
-            );
+    try {
+        String guestId = (String) request.getAttribute(
+                GuestIdentityFilter.GUEST_ID_ATTRIBUTE
+        );
 
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
+        if (guestId == null || guestId.isBlank()) {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error adding watermark: " + e.getMessage());
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Guest identity is missing.");
         }
+
+        String result = pdfWatermarkService.addWatermark(
+                id,
+                watermarkText,
+                outputFileName,
+                guestId
+        );
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error adding watermark: " + e.getMessage());
     }
+}
     @PostMapping("/protect/{id}")
     public ResponseEntity<?> protectPdf(
             @PathVariable("id") Long id,
