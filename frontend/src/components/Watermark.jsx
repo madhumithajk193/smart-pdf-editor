@@ -1,4 +1,9 @@
+
 import { useState } from "react";
+
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://smart-pdf-editor-backend.onrender.com";
 
 function Watermark({ pdfList, onWatermarkSuccess }) {
 
@@ -35,71 +40,95 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
 
         try {
 
+            setMessage("Adding watermark...");
+            setWatermarkedFileName("");
+
             const formData = new FormData();
 
-            formData.append(
-                "watermarkText",
-                watermarkText
-            );
-
-            formData.append(
-                "outputFileName",
-                fileName
-            );
+            formData.append("watermarkText", watermarkText);
+            formData.append("outputFileName", fileName);
 
             const response = await fetch(
-                `http://localhost:8080/api/pdfs/watermark/${selectedPdf}`,
+                `${API_URL}/api/pdfs/watermark/${selectedPdf}`,
                 {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    credentials: "include"
                 }
             );
 
             const result = await response.text();
 
-            if (response.ok) {
-
-                setMessage(
-                    "Watermark added successfully!"
+            if (!response.ok) {
+                throw new Error(
+                    result || "Watermark operation failed."
                 );
+            }
 
-                setWatermarkedFileName(fileName);
+            // Backend must return the actual saved filename.
+            const actualFileName = result.trim();
 
-                if (onWatermarkSuccess) {
-                    onWatermarkSuccess();
-                }
+            if (!actualFileName) {
+                throw new Error("Backend returned an empty filename.");
+            }
 
-            } else {
+            setWatermarkedFileName(actualFileName);
+            setMessage("Watermark added successfully!");
 
-                setMessage(
-                    "Error adding watermark: " + result
-                );
-
-                setWatermarkedFileName("");
+            if (onWatermarkSuccess) {
+                onWatermarkSuccess();
             }
 
         } catch (error) {
 
-            console.error(error);
+            console.error("Watermark error:", error);
 
             setMessage(
-                "Cannot connect to backend."
+                error.message || "Cannot connect to backend."
             );
 
             setWatermarkedFileName("");
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
 
         if (!watermarkedFileName) {
             return;
         }
 
-        window.open(
-            `http://localhost:8080/api/pdfs/download-merged/${encodeURIComponent(watermarkedFileName)}`,
-            "_blank"
-        );
+        try {
+
+            const response = await fetch(
+                `${API_URL}/api/pdfs/download-merged/${encodeURIComponent(watermarkedFileName)}`,
+                {
+                    method: "GET",
+                    credentials: "include"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to download watermarked PDF.");
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = watermarkedFileName;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(downloadUrl);
+
+        } catch (error) {
+
+            console.error("Download error:", error);
+            setMessage(error.message);
+        }
     };
 
     return (
@@ -107,38 +136,21 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
         <div className="watermarkContainer">
 
             <div className="watermarkHeader">
-
                 <h2>💧 Add Watermark</h2>
-
-                <p>
-                    Select a PDF and add a watermark
-                    to it.
-                </p>
-
+                <p>Select a PDF and add a watermark to it.</p>
             </div>
 
             <select
                 value={selectedPdf}
-                onChange={(e) =>
-                    setSelectedPdf(e.target.value)
-                }
+                onChange={(e) => setSelectedPdf(e.target.value)}
             >
-
-                <option value="">
-                    Select PDF
-                </option>
+                <option value="">Select PDF</option>
 
                 {pdfList.map((pdf) => (
-
-                    <option
-                        key={pdf.id}
-                        value={pdf.id}
-                    >
+                    <option key={pdf.id} value={pdf.id}>
                         {pdf.fileName}
                     </option>
-
                 ))}
-
             </select>
 
             <br />
@@ -147,9 +159,7 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
             <input
                 type="text"
                 value={watermarkText}
-                onChange={(e) =>
-                    setWatermarkText(e.target.value)
-                }
+                onChange={(e) => setWatermarkText(e.target.value)}
                 placeholder="Enter watermark text"
             />
 
@@ -159,9 +169,7 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
             <input
                 type="text"
                 value={outputFileName}
-                onChange={(e) =>
-                    setOutputFileName(e.target.value)
-                }
+                onChange={(e) => setOutputFileName(e.target.value)}
                 placeholder="Output file name"
             />
 
@@ -172,14 +180,10 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
                 💧 Add Watermark
             </button>
 
-            {message && (
-                <p>{message}</p>
-            )}
+            {message && <p>{message}</p>}
 
             {watermarkedFileName && (
-
                 <div>
-
                     <p>
                         <b>{watermarkedFileName}</b> is ready.
                     </p>
@@ -187,9 +191,7 @@ function Watermark({ pdfList, onWatermarkSuccess }) {
                     <button onClick={handleDownload}>
                         ⬇ Download Watermarked PDF
                     </button>
-
                 </div>
-
             )}
 
         </div>
