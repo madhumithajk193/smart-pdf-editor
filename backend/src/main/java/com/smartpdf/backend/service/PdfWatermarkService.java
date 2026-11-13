@@ -1,3 +1,4 @@
+
 package com.smartpdf.backend.service;
 
 import com.smartpdf.backend.entity.PdfFile;
@@ -60,15 +61,17 @@ public class PdfWatermarkService {
             throw new IOException("PDF storage path is missing.");
         }
 
-        // 2. Download the original PDF from Backblaze
+        // 2. Download original PDF from Backblaze
         Path inputPath =
                 storageService.downloadFile(pdfFile.getFilePath());
 
         if (inputPath == null || !Files.exists(inputPath)) {
-            throw new IOException("Could not download source PDF from storage.");
+            throw new IOException(
+                    "Could not download source PDF from storage."
+            );
         }
 
-        // 3. Create a temporary output directory
+        // 3. Create temporary output directory
         Path tempDir = Files.createTempDirectory("watermark-");
 
         String safeName = outputFileName == null
@@ -84,14 +87,15 @@ public class PdfWatermarkService {
             safeName += ".pdf";
         }
 
-        // Use a unique filename to avoid overwriting another PDF
+        // 4. Generate unique filename
         String uniqueFileName =
                 UUID.randomUUID() + "_" + safeName;
 
         Path outputPath = tempDir.resolve(uniqueFileName);
 
         try {
-            // 4. Load the source PDF
+
+            // 5. Load original PDF
             try (PDDocument document =
                          Loader.loadPDF(inputPath.toFile())) {
 
@@ -99,7 +103,7 @@ public class PdfWatermarkService {
                         Standard14Fonts.FontName.HELVETICA_BOLD
                 );
 
-                // 5. Add watermark to every page
+                // 6. Add watermark to every page
                 for (PDPage page : document.getPages()) {
 
                     PDRectangle pageSize = page.getMediaBox();
@@ -116,51 +120,63 @@ public class PdfWatermarkService {
                                          true
                                  )) {
 
+                        // Set watermark font
                         contentStream.setFont(font, 40);
 
+                        // Set watermark colour
                         contentStream.setNonStrokingColor(
                                 Color.LIGHT_GRAY
                         );
 
+                        // Calculate watermark text width
                         float textWidth =
                                 font.getStringWidth(watermarkText)
                                         / 1000 * 40;
 
-                        float x = (pageWidth - textWidth) / 2;
-                        float y = pageHeight / 2;
+                        // 7. Calculate page centre
+                        float centerX = pageWidth / 2;
+                        float centerY = pageHeight / 2;
 
+                        // 8. Save graphics state
                         contentStream.saveGraphicsState();
 
+                        // 9. Rotate around the page centre
                         contentStream.transform(
-                                new org.apache.pdfbox.util.Matrix(
-                                        (float) Math.cos(Math.toRadians(45)),
-                                        (float) Math.sin(Math.toRadians(45)),
-                                        (float) -Math.sin(Math.toRadians(45)),
-                                        (float) Math.cos(Math.toRadians(45)),
-                                        0,
-                                        0
-                                )
+                                org.apache.pdfbox.util.Matrix
+                                        .getRotateInstance(
+                                                Math.toRadians(45),
+                                                centerX,
+                                                centerY
+                                        )
                         );
 
+                        // 10. Write watermark at the centre
                         contentStream.beginText();
-                        contentStream.newLineAtOffset(x, y);
+
+                        contentStream.newLineAtOffset(
+                                -textWidth / 2,
+                                -20
+                        );
+
                         contentStream.showText(watermarkText);
+
                         contentStream.endText();
 
+                        // 11. Restore graphics state
                         contentStream.restoreGraphicsState();
                     }
                 }
 
-                // 6. Save the watermarked PDF temporarily
+                // 12. Save watermarked PDF temporarily
                 document.save(outputPath.toFile());
             }
 
-            // 7. Upload the generated PDF to Backblaze
+            // 13. Upload generated PDF to Backblaze
             String objectKey = "watermarked/" + uniqueFileName;
 
             storageService.uploadPath(outputPath, objectKey);
 
-            // 8. Save the new PDF record in the database
+            // 14. Save PDF record in database
             PdfFile watermarkedPdf = new PdfFile();
 
             watermarkedPdf.setFileName(uniqueFileName);
@@ -170,11 +186,12 @@ public class PdfWatermarkService {
 
             pdfRepository.save(watermarkedPdf);
 
-            // 9. Return the actual generated filename
+            // 15. Return actual generated filename
             return uniqueFileName;
 
         } finally {
-            // Remove only our temporary output file and directory
+
+            // Clean up temporary output
             Files.deleteIfExists(outputPath);
             Files.deleteIfExists(tempDir);
         }
