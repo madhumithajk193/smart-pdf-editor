@@ -440,28 +440,38 @@ public ResponseEntity<String> addTextToPdf(
                 .body("Error adding text to PDF: " + e.getMessage());
     }
 }
-    // Delete PDF
+    
+
+// Delete PDF
 @DeleteMapping("/{id}")
-public ResponseEntity<String> deletePdf(@PathVariable Long id) {
+public ResponseEntity<String> deletePdf(
+        @PathVariable Long id) {
+
     try {
+        // Get the current guest ID once
         String guestId = getCurrentGuestId();
 
-        PdfFile pdf = pdfService.getPdfById(id, getCurrentGuestId());
+        // Find the PDF belonging to this guest
+        PdfFile pdf = pdfService.getPdfById(id, guestId);
 
         if (pdf == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("PDF not found");
         }
 
+        // Delete the PDF
         pdfService.deletePdf(id, guestId);
 
         return ResponseEntity.ok("PDF deleted successfully");
 
     } catch (IOException e) {
+        e.printStackTrace();
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error deleting PDF: " + e.getMessage());
     }
 }
+
     @PostMapping("/highlight/{id}")
     public ResponseEntity<String> highlightArea(
             @PathVariable Long id,
