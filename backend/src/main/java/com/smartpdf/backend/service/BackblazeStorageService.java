@@ -280,17 +280,19 @@ public class BackblazeStorageService {
         );
     }
 
-    // =========================================================
-    // DELETE FILE
-    // =========================================================
+public void deleteFile(String objectKey) {
 
-    public void deleteFile(String objectKey) {
+    if (objectKey == null || objectKey.isBlank()) {
+        throw new IllegalArgumentException(
+                "Backblaze object key is empty"
+        );
+    }
 
-        if (objectKey == null ||
-                objectKey.isBlank()) {
+    try {
 
-            return;
-        }
+        System.out.println("B2 DELETE START");
+        System.out.println("Bucket: " + bucketName);
+        System.out.println("Object key: " + objectKey);
 
         DeleteObjectRequest request =
                 DeleteObjectRequest.builder()
@@ -300,12 +302,16 @@ public class BackblazeStorageService {
 
         s3Client.deleteObject(request);
 
-        System.out.println(
-                "Deleted from Backblaze: "
-                        + objectKey
+        System.out.println("B2 DELETE SUCCESS: " + objectKey);
+
+    } catch (Exception e) {
+
+        System.err.println("B2 DELETE FAILED");
+        e.printStackTrace();
+
+        throw new RuntimeException(
+                "Backblaze deletion failed: " + e.getMessage(),
+                e
         );
     }
-    public String getBucketName() {
-        return bucketName;
-    }
-    }
+}
