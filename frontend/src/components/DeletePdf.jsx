@@ -1,8 +1,14 @@
+
 import { useState } from "react";
+
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://smart-pdf-editor-backend.onrender.com";
 
 function DeletePdf({ pdfList, onDelete }) {
 
     const [selectedPdf, setSelectedPdf] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleDelete = async () => {
 
@@ -30,12 +36,17 @@ function DeletePdf({ pdfList, onDelete }) {
 
         try {
 
+            setLoading(true);
+
             const response = await fetch(
-                `http://localhost:8080/api/pdfs/${selectedPdf}`,
+                `${API_URL}/api/pdfs/${selectedPdf}`,
                 {
-                    method: "DELETE"
+                    method: "DELETE",
+                    credentials: "include"
                 }
             );
+
+            const message = await response.text();
 
             if (response.ok) {
 
@@ -49,8 +60,6 @@ function DeletePdf({ pdfList, onDelete }) {
 
             } else {
 
-                const message = await response.text();
-
                 alert(
                     message || "Failed to delete PDF."
                 );
@@ -59,12 +68,15 @@ function DeletePdf({ pdfList, onDelete }) {
 
         } catch (error) {
 
-            console.error(error);
+            console.error("Delete PDF error:", error);
 
-            alert("Cannot connect to backend.");
+            alert("Cannot connect to backend. Please try again.");
+
+        } finally {
+
+            setLoading(false);
 
         }
-
     };
 
     return (
@@ -86,6 +98,7 @@ function DeletePdf({ pdfList, onDelete }) {
                 onChange={(e) =>
                     setSelectedPdf(e.target.value)
                 }
+                disabled={loading}
             >
 
                 <option value="">
@@ -111,14 +124,14 @@ function DeletePdf({ pdfList, onDelete }) {
             <button
                 className="deleteButton"
                 onClick={handleDelete}
+                disabled={loading}
             >
-                🗑️ Delete PDF
+                {loading ? "Deleting..." : "🗑️ Delete PDF"}
             </button>
 
         </div>
 
     );
-
 }
 
 export default DeletePdf;
